@@ -1,6 +1,3 @@
-import argparse
-import pdb
-
 from system import LotkaVolterraSystem
 from solsim.simulation import Simulation
 
