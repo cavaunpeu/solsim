@@ -3,12 +3,16 @@ from solsim.base import BaseSystem
 
 class LotkaVolterraSystem(BaseSystem):
 
-  @property
-  def quantities(self):
-    return {
-      'population_size',
-      'food_supply'
-    }
+  def __init__(
+    self,
+    population_size,
+    food_supply
+  ):
+    self.population_size = population_size
+    self.food_supply = food_supply
 
   def step(self):
-    return {'population_size': 1, 'food_supply': 1}
+    return {
+      'population_size': self.population_size,
+      'food_supply': self.food_supply
+    }
