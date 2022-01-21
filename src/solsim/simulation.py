@@ -10,7 +10,7 @@ class Simulation:
     quantities = system.quantities
     if not watchlist.issubset(quantities):
       invalid_quantities = {q for q in watchlist if q not in quantities}
-      raise Exception(f"Please add {invalid_quantities} to quantities if you'd like to watch these quantities")
+      raise Exception(f"If you'd like to watch {invalid_quantities}, please add them to your system's `quantities` property")
 
     self.system = system
     self.watchlist = watchlist
