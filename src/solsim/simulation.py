@@ -6,12 +6,6 @@ import pandas as pd
 class Simulation:
 
   def __init__(self, system, watchlist, n_steps) -> None:
-    watchlist = set(watchlist)
-    quantities = set(system.quantities)
-    if not watchlist.issubset(quantities):
-      invalid_quantities = {q for q in watchlist if q not in quantities}
-      raise Exception(f"If you'd like to watch {invalid_quantities}, please add them to your system's `quantities` property")
-
     self.system = system
     self.watchlist = watchlist
     self.n_steps = n_steps
