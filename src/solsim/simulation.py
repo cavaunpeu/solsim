@@ -21,4 +21,7 @@ class Simulation:
 
   @staticmethod
   def _trim_result(result: Dict, watchlist: Set) -> Dict:
-    return {quantity: val for quantity, val in result.items() if quantity in watchlist}
+    for quantity in watchlist:
+      if quantity not in result:
+        raise Exception(f'{quantity} not found in result: {result}')
+    return {quantity: result[quantity] for quantity in watchlist}
