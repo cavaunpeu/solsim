@@ -142,9 +142,31 @@ class SimpleEscrowSystem(BaseSolanaSystem):
       )
     )
 
+  async def _submit(self, foo_coin_amount, bar_coin_amount):
+    await self._escrow_program.rpc['submit'](
+      self.escrow_account_bump,
+      foo_coin_amount,
+      bar_coin_amount,
+      ctx=Context(
+        accounts={
+          'bar_coin_mint': self.bar_coin_mint,
+          'swap_state': self.swap_state.public_key,
+          'maker_foo_coin_assoc_token_acct': self.maker_foo_coin_assoc_token_acct,
+          'escrow_account': self.escrow_account,
+          'payer': self.payer,
+          'maker': self.maker.public_key,
+          'token_program': TOKEN_PROGRAM_ID,
+          'rent': SYSVAR_RENT_PUBKEY,
+          'system_program': SYS_PROGRAM_ID
+        },
+        signers=[self.maker]
+      )
+    )
+
   async def initialStep(self) -> Dict:
     await self._initialize_escrow()
     await self._reset_assoc_token_acct_balances()
+    await self._submit(foo_coin_amount=10, bar_coin_amount=20)
     return {
       'foo_coin_trade_volume': 1,
       'bar_coin_trade_volume': 1,
