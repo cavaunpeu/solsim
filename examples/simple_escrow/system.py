@@ -187,12 +187,9 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     await self._submit_escrow(foo_coin_amount=10, bar_coin_amount=20)
     await self._accept_escrow()
     return {
-      'foo_coin_trade_volume': 1,
-      'bar_coin_trade_volume': 1,
+      'foo_coin_trade_volume': self.init_assoc_token_acct_balance - self.get_token_account_balance(self.maker_foo_coin_assoc_token_acct),
+      'bar_coin_trade_volume': self.init_assoc_token_acct_balance - self.get_token_account_balance(self.taker_bar_coin_assoc_token_acct),
     }
 
   async def step(self, state, history) -> Dict:
-    return {
-      'foo_coin_trade_volume': 1,
-      'bar_coin_trade_volume': 1,
-    }
+    return {}
