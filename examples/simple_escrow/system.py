@@ -29,13 +29,17 @@ class SimpleEscrowSystem(BaseSolanaSystem):
   def _init_addresses(self):
     self.foo_coin_mint, self.foo_coin_mint_bump = PublicKey.find_program_address([bytes("foo", encoding='utf8')], self._escrow_program.program_id)
     self.bar_coin_mint, self.bar_coin_mint_bump = PublicKey.find_program_address([bytes("bar", encoding='utf8')], self._escrow_program.program_id)
-    self.maker, self.taker = Keypair(), Keypair()
+    self.maker = Keypair()
+    self.taker = Keypair()
+    self.swap_state = Keypair()
+    self.escrow_account, self.escrow_account_bump = PublicKey.find_program_address([bytes(self.swap_state.public_key)], self._escrow_program.program_id)
 
   async def _initialize_escrow(self):
     await self._init_mints()
     await self._init_associated_token_accounts()
     await self._init_maker_assoc_token_accounts()
     await self._init_taker_assoc_token_accounts()
+    await self._init_escrow()
 
   async def _init_mints(self):
     await self._escrow_program.rpc['init_mints'](
@@ -94,6 +98,23 @@ class SimpleEscrowSystem(BaseSolanaSystem):
           'system_program': SYS_PROGRAM_ID
         },
         signers=[self.taker]
+      )
+    )
+
+  async def _init_escrow(self):
+    await self._escrow_program.rpc['init_escrow'](
+      self.escrow_account_bump,
+      ctx=Context(
+        accounts={
+          'foo_coin_mint': self.foo_coin_mint,
+          'swap_state': self.swap_state.public_key,
+          'escrow_account': self.escrow_account,
+          'payer': self.payer,
+          'token_program': TOKEN_PROGRAM_ID,
+          'rent': SYSVAR_RENT_PUBKEY,
+          'system_program': SYS_PROGRAM_ID
+        },
+        signers=[self.swap_state]
       )
     )
 
