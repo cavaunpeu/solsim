@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, Set
 
 import pandas as pd
@@ -11,15 +12,20 @@ class Simulation:
     self._n_steps = n_steps
 
   def run(self) -> pd.DataFrame:
+    return asyncio.run(self._run())
+
+  async def _run(self) -> pd.DataFrame:
     history, results = [], []
     for step in range(-1, self._n_steps):
       if step == -1:
-        state = self._system.initialStep()
+        state = await self._system.initialStep() if self._system.uses_solana else self._system.initialStep()
       else:
-        state = self._system.step(state, history)
+        state = await self._system.step(state, history) if self._system.uses_solana else self._system.step(state, history)
       state = {**state, 'step': step}
       history.append(state)
       results.append(self._filter_state(state))
+    if self._system.uses_solana:
+      await self._system.tearDown()
     return pd.DataFrame(results)
 
   def _filter_state(self, result: Dict) -> Dict:
