@@ -22,9 +22,8 @@ class Simulation:
       results.append(self._filter_state(state))
     return pd.DataFrame(results)
 
-  @staticmethod
-  def _trim_result(result: Dict, watchlist: Set) -> Dict:
-    for quantity in watchlist:
-      if quantity not in result:
-        raise Exception(f'{quantity} not found in result: {result}')
-    return {quantity: result[quantity] for quantity in watchlist}
+  def _filter_state(self, result: Dict) -> Dict:
+    for qty in self._watchlist:
+      if qty not in result:
+        raise Exception(f'{qty} not found in result: {result}')
+    return {qty: result[qty] for qty in self._watchlist | {'step'}}
