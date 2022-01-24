@@ -6,17 +6,20 @@ import pandas as pd
 class Simulation:
 
   def __init__(self, system, watchlist, n_steps) -> None:
-    self.system = system
-    self.watchlist = watchlist
-    self.n_steps = n_steps
+    self._system = system
+    self._watchlist = set(watchlist)
+    self._n_steps = n_steps
 
   def run(self) -> pd.DataFrame:
-    results = []
-    for step in range(self.n_steps):
-      res = self.system.step()
-      res = self._trim_result(res, self.watchlist)
-      res = {**res, 'step': step}
-      results.append(res)
+    history, results = [], []
+    for step in range(-1, self._n_steps):
+      if step == -1:
+        state = self._system.initialStep()
+      else:
+        state = self._system.step(state, history)
+      state = {**state, 'step': step}
+      history.append(state)
+      results.append(self._filter_state(state))
     return pd.DataFrame(results)
 
   @staticmethod
