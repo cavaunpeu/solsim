@@ -15,13 +15,13 @@ class Simulation:
     return asyncio.run(self._run())
 
   async def _run(self) -> pd.DataFrame:
-    history, results = [], []
+    state, history, results = {}, [], []
     for step in range(-1, self._n_steps):
       if step == -1:
-        state = await self._system.initialStep() if self._system.uses_solana else self._system.initialStep()
+        updates = await self._system.initialStep() if self._system.uses_solana else self._system.initialStep()
       else:
-        state = await self._system.step(state, history) if self._system.uses_solana else self._system.step(state, history)
-      state = {**state, 'step': step}
+        updates = await self._system.step(state, history) if self._system.uses_solana else self._system.step(state, history)
+      state = {**state, **updates, 'step': step}
       history.append(state)
       results.append(self._filter_state(state))
     if self._system.uses_solana:
