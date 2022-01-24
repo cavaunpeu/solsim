@@ -7,7 +7,8 @@ from solsim.simulation import Simulation
 if __name__ == '__main__':
   simulation = Simulation(
     system=SimpleEscrowSystem(
-      workspace_dir=os.path.join(os.path.dirname(__file__), 'workspace')
+      workspace_dir=os.path.join(os.path.dirname(__file__), 'workspace'),
+      init_assoc_token_acct_balance=100
     ),
     watchlist=(
       'foo_coin_trade_volume',
