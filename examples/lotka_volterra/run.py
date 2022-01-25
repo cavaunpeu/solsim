@@ -1,4 +1,4 @@
-from .system import LotkaVolterraSystem
+from system import LotkaVolterraSystem
 from solsim.simulation import Simulation
 
 

@@ -1,6 +1,6 @@
 import os
 
-from .system import SimpleEscrowSystem
+from system import SimpleEscrowSystem
 from solsim.simulation import Simulation
 
 
