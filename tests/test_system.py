@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
 
-from solsim.base import BaseSolanaSystem
+from solsim.system import BaseSolanaSystem
 
 
 @fixture(scope="function")

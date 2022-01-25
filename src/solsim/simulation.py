@@ -5,7 +5,7 @@ from collections.abc import Iterable
 import pandas as pd
 from tqdm.auto import tqdm
 
-from solsim.base import BaseSystem, BaseSolanaSystem
+from solsim.system import BaseSystem, BaseSolanaSystem
 from solsim.type import StateType
 
 

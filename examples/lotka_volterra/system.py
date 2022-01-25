@@ -1,5 +1,5 @@
 from typing import Dict
-from solsim.base import BaseSystem
+from solsim.system import BaseSystem
 
 
 class LotkaVolterraSystem(BaseSystem):

@@ -10,8 +10,8 @@ from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from spl.token.instructions import get_associated_token_address
 
-from solsim.base import BaseSolanaSystem
-from solsim.constants import (
+from solsim.system import BaseSolanaSystem
+from solsim.constant import (
     SYSVAR_RENT_PUBKEY,
     TOKEN_PROGRAM_ID,
     SYS_PROGRAM_ID,
