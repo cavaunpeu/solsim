@@ -10,7 +10,7 @@ env:
   anchor_version: 0.19.0
 
 jobs:
-  tests:
+  run:
     runs-on: ubuntu-latest
     strategy:
       matrix:
