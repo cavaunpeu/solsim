@@ -1,7 +1,7 @@
 # solsim
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/add-readme/logo.png" width="70%" height="70%">
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/logo.png" width="70%" height="70%">
 </div>
 
 ---
