@@ -2,6 +2,7 @@ import asyncio
 from typing import Dict, Set
 
 import pandas as pd
+from tqdm.auto import tqdm
 
 
 class Simulation:
@@ -17,7 +18,7 @@ class Simulation:
   async def _run(self) -> pd.DataFrame:
     try:
       state, history, results = {}, [], []
-      for step in range(-1, self._n_steps):
+      for step in tqdm(range(-1, self._n_steps), desc='Steps completed'):
         if step == -1:
           updates = await self._system.initialStep() if self._system.uses_solana else self._system.initialStep()
         else:
