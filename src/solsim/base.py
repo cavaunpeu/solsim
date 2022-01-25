@@ -24,9 +24,9 @@ class BaseSolanaSystem(BaseSystem):
 
   SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
-  def __init__(self, workspace_dir):
+  def __init__(self, workspace_dir, client=None):
     self.workspace = create_workspace(workspace_dir)
-    self.client = Client(self.SOLANA_CLUSTER_URI)
+    self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
   @property
   def uses_solana(self):
