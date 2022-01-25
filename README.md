@@ -1,5 +1,13 @@
 # solsim
 
+<div align="center">
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/add-readme/logo.png" width="70%" height="70%">
+</div>
+
+---
+
+[![Discord Chat](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/sxy4zxBckh)
+
 solsim is the Solana complex systems simulator. It simulates behavior of dynamical systems—e.g. DeFi protocols, DAO governance, cryptocurrencies—built on the [Solana](https://solana.com/) blockchain.
 
 ## Philosophy
