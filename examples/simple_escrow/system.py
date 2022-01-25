@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import random
 from typing import Dict, Tuple
@@ -254,23 +255,46 @@ class SimpleEscrowSystem(BaseSolanaSystem):
 
   async def _swap(self, reset_balances=False):
     escrows = await self._compose_escrows(reset_balances)
+    amounts = []
     for escrow in escrows:
       terms = self._propose_escrow_terms(escrow)
       if terms != (None, None):
         foo_coin_amount, bar_coin_amount = terms
         await escrow.submit(foo_coin_amount, bar_coin_amount)
         await escrow.accept()
-    return escrows
+        amounts.append(foo_coin_amount)  # foo_coin_amount and bar_coin_amount always equivalent
+    return escrows, amounts
+
+  def _compute_balance_spread_stats(self, escrows):
+    spreads = []
+    for escrow in escrows:
+      for role in ['maker', 'taker']:
+        spread = abs(
+          self.get_token_account_balance(escrow.assoc_token_accts[role]['foo']) - \
+          self.get_token_account_balance(escrow.assoc_token_accts[role]['bar'])
+        )
+        spreads.append(spread)
+    return {
+      'mean_balance_spread': np.mean(spreads)
+    }
+
+  def _compute_swap_amount_stats(self, amounts):
+    return {
+      'num_swaps': len(amounts),
+      'mean_swap_amount': np.mean(amounts)
+    }
 
   async def initialStep(self) -> Dict:
     await self._init_mints()
-    escrows = await self._swap(reset_balances=True)
-
+    escrows, amounts = await self._swap(reset_balances=True)
     return {
-      'foo_coin_trade_volume': 1,
-      'bar_coin_trade_volume': 1,
+      **self._compute_swap_amount_stats(amounts),
+      **self._compute_balance_spread_stats(escrows)
     }
 
   async def step(self, state, history) -> Dict:
-    escrows = await self._swap(reset_balances=False)
-    return {}
+    escrows, amounts = await self._swap(reset_balances=False)
+    return {
+      **self._compute_swap_amount_stats(amounts),
+      **self._compute_balance_spread_stats(escrows)
+    }

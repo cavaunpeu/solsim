@@ -12,9 +12,10 @@ if __name__ == '__main__':
       num_escrows=5
     ),
     watchlist=(
-      'foo_coin_trade_volume',
-      'bar_coin_trade_volume'
+      'num_swaps',
+      'mean_swap_amount',
+      'mean_balance_spread'
     ),
-    n_steps=3
+    n_steps=5
   )
   results = simulation.run()
