@@ -18,11 +18,11 @@ solsim will simulate its behavior and its collect results in a straightforward, 
 
 ## Usage
 
-1. Implement `initialStep` and `step` methods how you see fit.
-2. From each, return a dictionary mapping variables to current values.
+1. Implement `initialStep` and `step` methods.
+2. From each, return the current state, i.e. a dictionary mapping variables to current values.
 3. Specify the variables you'd like to "watch."
-4. Instantiate a `Simulation`, call `.run()`.
-5. Receive a [pandas](https://pandas.pydata.org/) DataFrame of results.
+4. Instantiate a Simulation, call .run().
+5. Receive a [pandas](https://pandas.pydata.org/) DataFrame containing values of "watched" variables at each step in time.
 
 ## Installation
 
@@ -68,7 +68,7 @@ Then,
 
 In `3`, solsim exposes the following attributes to your system:
 
-- `self.workspace`: IDL clients for the Solana programs that comprise your system (via [anchorpy](https://github.com/kevinheavey)).
+- `self.workspace`: IDL clients for the Solana programs that comprise your system (via [anchorpy](https://github.com/kevinheavey/anchorpy)).
 
 For example, these clients let you interact with your respective programs' RPC endpoints.
 
