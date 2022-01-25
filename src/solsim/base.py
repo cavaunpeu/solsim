@@ -1,22 +1,21 @@
-from abc import ABC, abstractmethod, abstractproperty
-from typing import Dict, Set, List, Any
+from abc import ABC, abstractmethod
+from typing import Awaitable, Dict, Set, List, Any, Union
 
 from anchorpy import create_workspace, close_workspace
 from solana.publickey import PublicKey
 from solana.rpc.api import Client
 
+from solsim.type import StateType
+
 
 class BaseSystem(ABC):
-    @property
-    def uses_solana(self):
-        return False
 
     @abstractmethod
-    def initialStep(self) -> Dict:
+    def initialStep(self) -> Awaitable[Any]:
         raise NotImplementedError
 
     @abstractmethod
-    def step(self, state: Dict[str, Any], history: List[Dict[str, Any]]) -> Dict:
+    def step(self, state: StateType, history: List[StateType]) -> Awaitable[Any]:
         raise NotImplementedError
 
 
@@ -28,11 +27,7 @@ class BaseSolanaSystem(BaseSystem):
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
-    @property
-    def uses_solana(self):
-        return True
-
-    async def tearDown(self):
+    async def tearDown(self) -> Awaitable[Any]:
         await close_workspace(self.workspace)
 
     def get_token_account_balance(
