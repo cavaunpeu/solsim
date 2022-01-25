@@ -1,7 +1,10 @@
 import os
+import random
 from typing import Dict, Tuple
 
+
 from anchorpy import create_workspace, close_workspace, Context
+import numpy as np
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from spl.token.instructions import get_associated_token_address
@@ -44,11 +47,12 @@ class SimpleEscrow:
       self.program.program_id
     )
 
-  async def initialize(self):
+  async def initialize(self, reset_balances=True):
     await self._get_assoc_token_accounts()
     await self._init_maker_assoc_token_accounts()
     await self._init_taker_assoc_token_accounts()
-    await self._reset_assoc_token_acct_balances()
+    if reset_balances:
+      await self._reset_assoc_token_acct_balances()
     await self._init_escrow()
 
   async def _get_assoc_token_accounts(self):
@@ -186,17 +190,23 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     self,
     workspace_dir: str,
     init_assoc_token_acct_balance: int,
-    num_maker_taker_pairs: int
+    num_escrows: int
   ):
     super().__init__(workspace_dir)
     self._escrow_program = self.workspace['simple_escrow']
     self.payer = self._escrow_program.provider.wallet.public_key
     self.init_assoc_token_acct_balance = init_assoc_token_acct_balance
-    self.maker_taker_pairs = [(Keypair(), Keypair()) for _ in range(num_maker_taker_pairs)]
-    self.escrows = []
+    self.agents = [Keypair() for _ in range(num_escrows * 2)]
 
-  async def _compose_escrows(self):
-    for maker, taker in self.maker_taker_pairs:
+  def _compose_maker_taker_pairs(self):
+    agents = list(self.agents)
+    random.shuffle(agents)
+    return [tuple(agents[i : i + 2]) for i in range(0, len(agents), 2)]
+
+  async def _compose_escrows(self, reset_balances):
+    pairs = self._compose_maker_taker_pairs()
+    escrows = []
+    for maker, taker in pairs:
       escrow = SimpleEscrow(
         maker,
         taker,
@@ -208,8 +218,9 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         self._escrow_program,
         self.init_assoc_token_acct_balance
       )
-      await escrow.initialize()
-      self.escrows.append(escrow)
+      await escrow.initialize(reset_balances)
+      escrows.append(escrow)
+    return escrows
 
   async def _init_mints(self):
     self.foo_coin_mint, self.foo_coin_mint_bump = PublicKey.find_program_address([bytes("foo", encoding='utf8')], self._escrow_program.program_id)
@@ -229,20 +240,37 @@ class SimpleEscrowSystem(BaseSolanaSystem):
       )
     )
 
-  def _propose_escrow_terms(self) -> Tuple[float, float]:
-    return (10, 10)
+  def _propose_escrow_terms(self, escrow) -> Tuple[float, float]:
+    maker_foo_balance = self.get_token_account_balance(escrow.assoc_token_accts['maker']['foo'])
+    taker_bar_balance = self.get_token_account_balance(escrow.assoc_token_accts['taker']['bar'])
+    if maker_foo_balance > 1 and taker_bar_balance > 1:
+      foo_amt = np.random.randint(1, maker_foo_balance)
+      bar_amt = np.random.randint(1, taker_bar_balance)
+      amt = min(foo_amt, bar_amt)
+      terms = (amt, amt)
+    else:
+      terms = (None, None)
+    return terms
+
+  async def _swap(self, reset_balances=False):
+    escrows = await self._compose_escrows(reset_balances)
+    for escrow in escrows:
+      terms = self._propose_escrow_terms(escrow)
+      if terms != (None, None):
+        foo_coin_amount, bar_coin_amount = terms
+        await escrow.submit(foo_coin_amount, bar_coin_amount)
+        await escrow.accept()
+    return escrows
 
   async def initialStep(self) -> Dict:
     await self._init_mints()
-    await self._compose_escrows()
-    for escrow in self.escrows:
-      foo_coin_amount, bar_coin_amount = self._propose_escrow_terms()
-      await escrow.submit(foo_coin_amount, bar_coin_amount)
-      await escrow.accept()
+    escrows = await self._swap(reset_balances=True)
+
     return {
       'foo_coin_trade_volume': 1,
       'bar_coin_trade_volume': 1,
     }
 
   async def step(self, state, history) -> Dict:
+    escrows = await self._swap(reset_balances=False)
     return {}
