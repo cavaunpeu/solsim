@@ -1,10 +1,10 @@
 import os
 
-from system import SimpleEscrowSystem
+from .system import SimpleEscrowSystem
 from solsim.simulation import Simulation
 
 
-if __name__ == '__main__':
+def main():
   simulation = Simulation(
     system=SimpleEscrowSystem(
       workspace_dir=os.path.join(os.path.dirname(__file__), 'workspace'),
@@ -19,3 +19,7 @@ if __name__ == '__main__':
     n_steps=5
   )
   results = simulation.run()
+
+
+if __name__ == '__main__':
+  main()

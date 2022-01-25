@@ -1,8 +1,8 @@
-from system import LotkaVolterraSystem
+from .system import LotkaVolterraSystem
 from solsim.simulation import Simulation
 
 
-if __name__ == '__main__':
+def main():
   simulation = Simulation(
     system=LotkaVolterraSystem(
       population_size=50,
@@ -17,3 +17,7 @@ if __name__ == '__main__':
     n_steps=5
   )
   results = simulation.run()
+
+
+if __name__ == '__main__':
+  main()
