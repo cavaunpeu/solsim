@@ -22,10 +22,6 @@ class LotkaVolterraSystem(BaseSystem):
         }
 
     def step(self, state, history) -> Dict:
-        population_size = max(
-            state["population_size"] + self.reproduction_rate * state["food_supply"], 0
-        )
-        food_supply = max(
-            state["food_supply"] - self.consumption_rate * state["population_size"], 0
-        )
+        population_size = max(state["population_size"] + self.reproduction_rate * state["food_supply"], 0)
+        food_supply = max(state["food_supply"] - self.consumption_rate * state["population_size"], 0)
         return {"population_size": population_size, "food_supply": food_supply}

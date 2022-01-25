@@ -57,20 +57,12 @@ class SimpleEscrow:
     async def _get_assoc_token_accounts(self):
         self.assoc_token_accts = {
             "maker": {
-                "foo": get_associated_token_address(
-                    self.maker.public_key, self.foo_coin_mint
-                ),
-                "bar": get_associated_token_address(
-                    self.maker.public_key, self.bar_coin_mint
-                ),
+                "foo": get_associated_token_address(self.maker.public_key, self.foo_coin_mint),
+                "bar": get_associated_token_address(self.maker.public_key, self.bar_coin_mint),
             },
             "taker": {
-                "foo": get_associated_token_address(
-                    self.taker.public_key, self.foo_coin_mint
-                ),
-                "bar": get_associated_token_address(
-                    self.taker.public_key, self.bar_coin_mint
-                ),
+                "foo": get_associated_token_address(self.taker.public_key, self.foo_coin_mint),
+                "bar": get_associated_token_address(self.taker.public_key, self.bar_coin_mint),
             },
         }
 
@@ -80,12 +72,8 @@ class SimpleEscrow:
                 accounts={
                     "foo_coin_mint": self.foo_coin_mint,
                     "bar_coin_mint": self.bar_coin_mint,
-                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"][
-                        "foo"
-                    ],
-                    "maker_bar_coin_assoc_token_acct": self.assoc_token_accts["maker"][
-                        "bar"
-                    ],
+                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"]["foo"],
+                    "maker_bar_coin_assoc_token_acct": self.assoc_token_accts["maker"]["bar"],
                     "payer": self.payer,
                     "maker": self.maker.public_key,
                     "token_program": TOKEN_PROGRAM_ID,
@@ -103,12 +91,8 @@ class SimpleEscrow:
                 accounts={
                     "foo_coin_mint": self.foo_coin_mint,
                     "bar_coin_mint": self.bar_coin_mint,
-                    "taker_foo_coin_assoc_token_acct": self.assoc_token_accts["taker"][
-                        "foo"
-                    ],
-                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"][
-                        "bar"
-                    ],
+                    "taker_foo_coin_assoc_token_acct": self.assoc_token_accts["taker"]["foo"],
+                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"]["bar"],
                     "payer": self.payer,
                     "taker": self.taker.public_key,
                     "token_program": TOKEN_PROGRAM_ID,
@@ -146,12 +130,8 @@ class SimpleEscrow:
                 accounts={
                     "foo_coin_mint": self.foo_coin_mint,
                     "bar_coin_mint": self.bar_coin_mint,
-                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"][
-                        "foo"
-                    ],
-                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"][
-                        "bar"
-                    ],
+                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"]["foo"],
+                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"]["bar"],
                     "payer": self.payer,
                     "maker": self.maker.public_key,
                     "taker": self.taker.public_key,
@@ -172,9 +152,7 @@ class SimpleEscrow:
                 accounts={
                     "bar_coin_mint": self.bar_coin_mint,
                     "swap_state": self.swap_state.public_key,
-                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"][
-                        "foo"
-                    ],
+                    "maker_foo_coin_assoc_token_acct": self.assoc_token_accts["maker"]["foo"],
                     "escrow_account": self.escrow_account,
                     "payer": self.payer,
                     "maker": self.maker.public_key,
@@ -191,16 +169,10 @@ class SimpleEscrow:
             ctx=Context(
                 accounts={
                     "swap_state": self.swap_state.public_key,
-                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"][
-                        "bar"
-                    ],
-                    "maker_bar_coin_assoc_token_acct": self.assoc_token_accts["maker"][
-                        "bar"
-                    ],
+                    "taker_bar_coin_assoc_token_acct": self.assoc_token_accts["taker"]["bar"],
+                    "maker_bar_coin_assoc_token_acct": self.assoc_token_accts["maker"]["bar"],
                     "escrow_account": self.escrow_account,
-                    "taker_foo_coin_assoc_token_acct": self.assoc_token_accts["taker"][
-                        "foo"
-                    ],
+                    "taker_foo_coin_assoc_token_acct": self.assoc_token_accts["taker"]["foo"],
                     "payer": self.payer,
                     "maker": self.maker.public_key,
                     "taker": self.taker.public_key,
@@ -212,9 +184,7 @@ class SimpleEscrow:
 
 
 class SimpleEscrowSystem(BaseSolanaSystem):
-    def __init__(
-        self, workspace_dir: str, init_assoc_token_acct_balance: int, num_escrows: int
-    ):
+    def __init__(self, workspace_dir: str, init_assoc_token_acct_balance: int, num_escrows: int):
         super().__init__(workspace_dir)
         self._escrow_program = self.workspace["simple_escrow"]
         self.payer = self._escrow_program.provider.wallet.public_key
@@ -268,12 +238,8 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         )
 
     def _propose_escrow_terms(self, escrow) -> Tuple[float, float]:
-        maker_foo_balance = self.get_token_account_balance(
-            escrow.assoc_token_accts["maker"]["foo"]
-        )
-        taker_bar_balance = self.get_token_account_balance(
-            escrow.assoc_token_accts["taker"]["bar"]
-        )
+        maker_foo_balance = self.get_token_account_balance(escrow.assoc_token_accts["maker"]["foo"])
+        taker_bar_balance = self.get_token_account_balance(escrow.assoc_token_accts["taker"]["bar"])
         if maker_foo_balance > 1 and taker_bar_balance > 1:
             foo_amt = np.random.randint(1, maker_foo_balance)
             bar_amt = np.random.randint(1, taker_bar_balance)
@@ -292,9 +258,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
                 foo_coin_amount, bar_coin_amount = terms
                 await escrow.submit(foo_coin_amount, bar_coin_amount)
                 await escrow.accept()
-                amounts.append(
-                    foo_coin_amount
-                )  # foo_coin_amount and bar_coin_amount always equivalent
+                amounts.append(foo_coin_amount)  # foo_coin_amount and bar_coin_amount always equivalent
         return escrows, amounts
 
     def _compute_balance_spread_stats(self, escrows):
@@ -302,12 +266,8 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         for escrow in escrows:
             for role in ["maker", "taker"]:
                 spread = abs(
-                    self.get_token_account_balance(
-                        escrow.assoc_token_accts[role]["foo"]
-                    )
-                    - self.get_token_account_balance(
-                        escrow.assoc_token_accts[role]["bar"]
-                    )
+                    self.get_token_account_balance(escrow.assoc_token_accts[role]["foo"])
+                    - self.get_token_account_balance(escrow.assoc_token_accts[role]["bar"])
                 )
                 spreads.append(spread)
         return {"mean_balance_spread": np.mean(spreads)}

@@ -23,9 +23,7 @@ def solana_client():
 @fixture(scope="function")
 def solana_system(solana_client):
     class SomeSolanaSystem(BaseSolanaSystem):
-        def __init__(
-            self, workspace_dir=os.path.join(os.path.dirname(__file__), "idls")
-        ):
+        def __init__(self, workspace_dir=os.path.join(os.path.dirname(__file__), "idls")):
             super().__init__(workspace_dir, client=solana_client)
 
         def initialStep(self) -> Dict:
@@ -39,7 +37,5 @@ def solana_system(solana_client):
 
 def test_get_token_account_balance(solana_system):
     expected = 10
-    actual = solana_system.get_token_account_balance(
-        pubkey=Keypair(), commitment="confirmed"
-    )
+    actual = solana_system.get_token_account_balance(pubkey=Keypair(), commitment="confirmed")
     assert actual == expected

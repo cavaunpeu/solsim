@@ -10,7 +10,6 @@ from solsim.type import StateType
 
 
 class BaseSystem(ABC):
-
     @abstractmethod
     def initialStep(self) -> Awaitable[Any]:
         raise NotImplementedError
@@ -31,5 +30,7 @@ class BaseSolanaSystem(BaseSystem):
     async def tearDown(self) -> None:
         await close_workspace(self.workspace)
 
-    def get_token_account_balance(self, pubkey: PublicKey, commitment: Optional[commitment.Commitment] = commitment.Confirmed) -> float:
+    def get_token_account_balance(
+        self, pubkey: PublicKey, commitment: Optional[commitment.Commitment] = commitment.Confirmed
+    ) -> float:
         return float(self.client.get_token_account_balance(pubkey, commitment)["result"]["value"]["uiAmount"])
