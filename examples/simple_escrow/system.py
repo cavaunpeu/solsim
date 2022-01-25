@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, Tuple
 
 from anchorpy import create_workspace, close_workspace, Context
 from solana.keypair import Keypair
@@ -15,64 +15,62 @@ from solsim.constants import (
 )
 
 
-class SimpleEscrowSystem(BaseSolanaSystem):
+class SimpleEscrow:
 
   def __init__(
     self,
-    workspace_dir: str,
-    init_assoc_token_acct_balance: int
+    maker,
+    taker,
+    payer,
+    foo_coin_mint,
+    bar_coin_mint,
+    foo_coin_mint_bump,
+    bar_coin_mint_bump,
+    program,
+    init_assoc_token_acct_balance
   ):
-    super().__init__(workspace_dir)
-    self._escrow_program = self.workspace['simple_escrow']
-    self._init_addresses()
-    self.payer = self._escrow_program.provider.wallet.public_key
+    self.maker = maker
+    self.taker = taker
+    self.payer = payer
+    self.foo_coin_mint = foo_coin_mint
+    self.bar_coin_mint = bar_coin_mint
+    self.foo_coin_mint_bump = foo_coin_mint_bump
+    self.bar_coin_mint_bump = bar_coin_mint_bump
+    self.program = program
     self.init_assoc_token_acct_balance = init_assoc_token_acct_balance
-
-  def _init_addresses(self):
-    self.foo_coin_mint, self.foo_coin_mint_bump = PublicKey.find_program_address([bytes("foo", encoding='utf8')], self._escrow_program.program_id)
-    self.bar_coin_mint, self.bar_coin_mint_bump = PublicKey.find_program_address([bytes("bar", encoding='utf8')], self._escrow_program.program_id)
-    self.maker = Keypair()
-    self.taker = Keypair()
     self.swap_state = Keypair()
-    self.escrow_account, self.escrow_account_bump = PublicKey.find_program_address([bytes(self.swap_state.public_key)], self._escrow_program.program_id)
-
-  async def _initialize_escrow(self):
-    await self._init_mints()
-    await self._init_associated_token_accounts()
-    await self._init_maker_assoc_token_accounts()
-    await self._init_taker_assoc_token_accounts()
-    await self._init_escrow()
-
-  async def _init_mints(self):
-    await self._escrow_program.rpc['init_mints'](
-      self.foo_coin_mint_bump,
-      self.bar_coin_mint_bump,
-      ctx=Context(
-        accounts={
-          'foo_coin_mint': self.foo_coin_mint,
-          'bar_coin_mint': self.bar_coin_mint,
-          'payer': self.payer,
-          'token_program': TOKEN_PROGRAM_ID,
-          'rent': SYSVAR_RENT_PUBKEY,
-          'system_program': SYS_PROGRAM_ID
-        }
-      )
+    self.escrow_account, self.escrow_account_bump = PublicKey.find_program_address(
+      [bytes(self.swap_state.public_key)],
+      self.program.program_id
     )
 
-  async def _init_associated_token_accounts(self):
-    self.maker_foo_coin_assoc_token_acct = get_associated_token_address(self.maker.public_key, self.foo_coin_mint)
-    self.maker_bar_coin_assoc_token_acct = get_associated_token_address(self.maker.public_key, self.bar_coin_mint)
-    self.taker_foo_coin_assoc_token_acct = get_associated_token_address(self.taker.public_key, self.foo_coin_mint)
-    self.taker_bar_coin_assoc_token_acct = get_associated_token_address(self.taker.public_key, self.bar_coin_mint)
+  async def initialize(self):
+    await self._get_assoc_token_accounts()
+    await self._init_maker_assoc_token_accounts()
+    await self._init_taker_assoc_token_accounts()
+    await self._reset_assoc_token_acct_balances()
+    await self._init_escrow()
+
+  async def _get_assoc_token_accounts(self):
+    self.assoc_token_accts = {
+      'maker': {
+        'foo': get_associated_token_address(self.maker.public_key, self.foo_coin_mint),
+        'bar': get_associated_token_address(self.maker.public_key, self.bar_coin_mint),
+      },
+      'taker': {
+        'foo': get_associated_token_address(self.taker.public_key, self.foo_coin_mint),
+        'bar': get_associated_token_address(self.taker.public_key, self.bar_coin_mint),
+      },
+    }
 
   async def _init_maker_assoc_token_accounts(self):
-    await self._escrow_program.rpc['init_maker_assoc_token_accts'](
+    await self.program.rpc['init_maker_assoc_token_accts'](
       ctx=Context(
         accounts={
           'foo_coin_mint': self.foo_coin_mint,
           'bar_coin_mint': self.bar_coin_mint,
-          'maker_foo_coin_assoc_token_acct': self.maker_foo_coin_assoc_token_acct,
-          'maker_bar_coin_assoc_token_acct': self.maker_bar_coin_assoc_token_acct,
+          'maker_foo_coin_assoc_token_acct': self.assoc_token_accts['maker']['foo'],
+          'maker_bar_coin_assoc_token_acct': self.assoc_token_accts['maker']['bar'],
           'payer': self.payer,
           'maker': self.maker.public_key,
           'token_program': TOKEN_PROGRAM_ID,
@@ -85,13 +83,13 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     )
 
   async def _init_taker_assoc_token_accounts(self):
-    await self._escrow_program.rpc['init_taker_assoc_token_accts'](
+    await self.program.rpc['init_taker_assoc_token_accts'](
       ctx=Context(
         accounts={
           'foo_coin_mint': self.foo_coin_mint,
           'bar_coin_mint': self.bar_coin_mint,
-          'taker_foo_coin_assoc_token_acct': self.taker_foo_coin_assoc_token_acct,
-          'taker_bar_coin_assoc_token_acct': self.taker_bar_coin_assoc_token_acct,
+          'taker_foo_coin_assoc_token_acct': self.assoc_token_accts['taker']['foo'],
+          'taker_bar_coin_assoc_token_acct': self.assoc_token_accts['taker']['bar'],
           'payer': self.payer,
           'taker': self.taker.public_key,
           'token_program': TOKEN_PROGRAM_ID,
@@ -104,7 +102,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     )
 
   async def _init_escrow(self):
-    await self._escrow_program.rpc['init_escrow'](
+    await self.program.rpc['init_escrow'](
       self.escrow_account_bump,
       ctx=Context(
         accounts={
@@ -121,7 +119,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     )
 
   async def _reset_assoc_token_acct_balances(self):
-    await self._escrow_program.rpc['reset_assoc_token_acct_balances'](
+    await self.program.rpc['reset_assoc_token_acct_balances'](
       self.foo_coin_mint_bump,
       self.bar_coin_mint_bump,
       self.init_assoc_token_acct_balance,
@@ -129,8 +127,8 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         accounts={
           'foo_coin_mint': self.foo_coin_mint,
           'bar_coin_mint': self.bar_coin_mint,
-          'maker_foo_coin_assoc_token_acct': self.maker_foo_coin_assoc_token_acct,
-          'taker_bar_coin_assoc_token_acct': self.taker_bar_coin_assoc_token_acct,
+          'maker_foo_coin_assoc_token_acct': self.assoc_token_accts['maker']['foo'],
+          'taker_bar_coin_assoc_token_acct': self.assoc_token_accts['taker']['bar'],
           'payer': self.payer,
           'maker': self.maker.public_key,
           'taker': self.taker.public_key,
@@ -142,8 +140,8 @@ class SimpleEscrowSystem(BaseSolanaSystem):
       )
     )
 
-  async def _submit_escrow(self, foo_coin_amount, bar_coin_amount):
-    await self._escrow_program.rpc['submit'](
+  async def submit(self, foo_coin_amount, bar_coin_amount):
+    await self.program.rpc['submit'](
       self.escrow_account_bump,
       foo_coin_amount,
       bar_coin_amount,
@@ -151,7 +149,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         accounts={
           'bar_coin_mint': self.bar_coin_mint,
           'swap_state': self.swap_state.public_key,
-          'maker_foo_coin_assoc_token_acct': self.maker_foo_coin_assoc_token_acct,
+          'maker_foo_coin_assoc_token_acct': self.assoc_token_accts['maker']['foo'],
           'escrow_account': self.escrow_account,
           'payer': self.payer,
           'maker': self.maker.public_key,
@@ -163,15 +161,15 @@ class SimpleEscrowSystem(BaseSolanaSystem):
       )
     )
 
-  async def _accept_escrow(self):
-    await self._escrow_program.rpc['accept'](
+  async def accept(self):
+    await self.program.rpc['accept'](
       ctx=Context(
         accounts={
           'swap_state': self.swap_state.public_key,
-          'taker_bar_coin_assoc_token_acct': self.taker_bar_coin_assoc_token_acct,
-          'maker_bar_coin_assoc_token_acct': self.maker_bar_coin_assoc_token_acct,
+          'taker_bar_coin_assoc_token_acct': self.assoc_token_accts['taker']['bar'],
+          'maker_bar_coin_assoc_token_acct': self.assoc_token_accts['maker']['bar'],
           'escrow_account': self.escrow_account,
-          'taker_foo_coin_assoc_token_acct': self.taker_foo_coin_assoc_token_acct,
+          'taker_foo_coin_assoc_token_acct': self.assoc_token_accts['taker']['foo'],
           'payer': self.payer,
           'maker': self.maker.public_key,
           'taker': self.taker.public_key,
@@ -181,14 +179,69 @@ class SimpleEscrowSystem(BaseSolanaSystem):
       )
     )
 
+
+class SimpleEscrowSystem(BaseSolanaSystem):
+
+  def __init__(
+    self,
+    workspace_dir: str,
+    init_assoc_token_acct_balance: int,
+    num_maker_taker_pairs: int
+  ):
+    super().__init__(workspace_dir)
+    self._escrow_program = self.workspace['simple_escrow']
+    self.payer = self._escrow_program.provider.wallet.public_key
+    self.init_assoc_token_acct_balance = init_assoc_token_acct_balance
+    self.maker_taker_pairs = [(Keypair(), Keypair()) for _ in range(num_maker_taker_pairs)]
+    self.escrows = []
+
+  async def _compose_escrows(self):
+    for maker, taker in self.maker_taker_pairs:
+      escrow = SimpleEscrow(
+        maker,
+        taker,
+        self.payer,
+        self.foo_coin_mint,
+        self.bar_coin_mint,
+        self.foo_coin_mint_bump,
+        self.bar_coin_mint_bump,
+        self._escrow_program,
+        self.init_assoc_token_acct_balance
+      )
+      await escrow.initialize()
+      self.escrows.append(escrow)
+
+  async def _init_mints(self):
+    self.foo_coin_mint, self.foo_coin_mint_bump = PublicKey.find_program_address([bytes("foo", encoding='utf8')], self._escrow_program.program_id)
+    self.bar_coin_mint, self.bar_coin_mint_bump = PublicKey.find_program_address([bytes("bar", encoding='utf8')], self._escrow_program.program_id)
+    await self._escrow_program.rpc['init_mints'](
+      self.foo_coin_mint_bump,
+      self.bar_coin_mint_bump,
+      ctx=Context(
+        accounts={
+          'foo_coin_mint': self.foo_coin_mint,
+          'bar_coin_mint': self.bar_coin_mint,
+          'payer': self.payer,
+          'token_program': TOKEN_PROGRAM_ID,
+          'rent': SYSVAR_RENT_PUBKEY,
+          'system_program': SYS_PROGRAM_ID
+        }
+      )
+    )
+
+  def _propose_escrow_terms(self) -> Tuple[float, float]:
+    return (10, 10)
+
   async def initialStep(self) -> Dict:
-    await self._initialize_escrow()
-    await self._reset_assoc_token_acct_balances()
-    await self._submit_escrow(foo_coin_amount=10, bar_coin_amount=20)
-    await self._accept_escrow()
+    await self._init_mints()
+    await self._compose_escrows()
+    for escrow in self.escrows:
+      foo_coin_amount, bar_coin_amount = self._propose_escrow_terms()
+      await escrow.submit(foo_coin_amount, bar_coin_amount)
+      await escrow.accept()
     return {
-      'foo_coin_trade_volume': self.init_assoc_token_acct_balance - self.get_token_account_balance(self.maker_foo_coin_assoc_token_acct),
-      'bar_coin_trade_volume': self.init_assoc_token_acct_balance - self.get_token_account_balance(self.taker_bar_coin_assoc_token_acct),
+      'foo_coin_trade_volume': 1,
+      'bar_coin_trade_volume': 1,
     }
 
   async def step(self, state, history) -> Dict:
