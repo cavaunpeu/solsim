@@ -30,8 +30,8 @@ class Simulation:
         await self._system.tearDown()
     return pd.DataFrame(results)
 
-  def _filter_state(self, result: Dict) -> Dict:
+  def _filter_state(self, state: Dict) -> Dict:
     for qty in self._watchlist:
-      if qty not in result:
-        raise Exception(f'{qty} not found in result: {result}')
-    return {qty: result[qty] for qty in self._watchlist | {'step'}}
+      if qty not in state:
+        raise Exception(f'{qty} not found in state: {state}')
+    return {qty: state[qty] for qty in self._watchlist | {'step'}}
