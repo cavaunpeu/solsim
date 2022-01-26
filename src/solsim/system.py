@@ -34,15 +34,15 @@ class BaseSolanaSystem(BaseSystem):
 
     SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
-    def __init__(self, workspace_dir: str, client: Optional[Client] = None, start_localnet: bool = True) -> None:
-        if start_localnet:
+    def __init__(self, workspace_dir: str, client: Optional[Client] = None, localnet_process: Optional[Process] = None) -> None:
+        if not localnet_process:
             self._logfile = tempfile.NamedTemporaryFile()
             self._localnet = self._start_localnet(workspace_dir)
             print("Waiting for Solana localnet cluster to start (~10s) ...")
             while not self._localnet_ready:
                 time.sleep(1)
         else:
-            self._localnet = None  # type: ignore
+            self._localnet = localnet_process  # type: ignore
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
