@@ -26,7 +26,7 @@ class BaseSystem(ABC):
         raise NotImplementedError
 
     @property
-    def uses_solana(self):
+    def uses_solana(self) -> bool:
         return isinstance(self, BaseSolanaSystem)
 
 
@@ -42,18 +42,18 @@ class BaseSolanaSystem(BaseSystem):
             while not self._localnet_ready:
                 time.sleep(1)
         else:
-            self._localnet = None
+            self._localnet = None  # type: ignore
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
-    def _start_localnet(self, workspace_dir):
+    def _start_localnet(self, workspace_dir: str) -> subprocess.Popen[Any]:
         for proc in psutil.process_iter():
             if proc.name() == "solana-test-validator":
                 self._terminate_processes([proc])
         return subprocess.Popen(["anchor", "localnet"], cwd=workspace_dir, stdout=self._logfile, stderr=DEVNULL)
 
     @property
-    def _localnet_ready(self):
+    def _localnet_ready(self) -> bool:
         lastline = subprocess.check_output(["tail", "-n", "1", self._logfile.name]).decode("utf-8").strip()
         return "| Processed Slot: " in lastline
 
@@ -67,7 +67,7 @@ class BaseSolanaSystem(BaseSystem):
     ) -> float:
         return float(self.client.get_token_account_balance(pubkey, commitment)["result"]["value"]["uiAmount"])
 
-    def _terminate_processes(self, kill_list: list[Process], timeout: int = 10):
+    def _terminate_processes(self, kill_list: list[Process], timeout: int = 10) -> None:
         # Attempt graceful termination first.
         for p in reversed(kill_list):
             self._signal_process(p, signal.SIGTERM)
@@ -95,7 +95,7 @@ class BaseSolanaSystem(BaseSystem):
         else:
             return
 
-    def _signal_process(self, p, sig):
+    def _signal_process(self, p: Process, sig: signal.Signals) -> None:
         """
         Borrowed from: https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L29.
         """

@@ -33,7 +33,7 @@ class Simulation:
                 results.append(self._filter_state(state))
         finally:
             if self._system.uses_solana:
-                await self._system.tearDown()
+                await self._system.tearDown()  # type: ignore
         return pd.DataFrame(results)
 
     def _filter_state(self, state: StateType) -> StateType:
