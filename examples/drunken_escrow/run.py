@@ -7,7 +7,7 @@ from solsim.simulation import Simulation
 def main():
     simulation = Simulation(
         system=SimpleEscrowSystem(
-            workspace_dir=os.path.join(os.path.dirname(__file__), "workspace"),
+            workspace_dir=os.path.join(os.path.dirname(__file__), "anchor-escrow-program"),
             init_assoc_token_acct_balance=100,
             num_escrows=3,
         ),

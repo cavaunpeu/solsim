@@ -1,6 +1,6 @@
 import asyncio
-from typing import Dict, List, Set, Union
 from collections.abc import Iterable
+from typing import Dict, List, Set, Union
 
 import pandas as pd
 from tqdm.auto import tqdm
@@ -23,25 +23,17 @@ class Simulation:
             state: StateType = {}
             history: list[StateType] = []
             results: list[StateType] = []
-            for step in tqdm(range(-1, self._n_steps), desc="Steps completed"):
-                if step == -1:
-                    updates = (
-                        await self._system.initialStep()
-                        if isinstance(self._system, BaseSolanaSystem)
-                        else self._system.initialStep()
-                    )
+            for step in tqdm(range(-1, self._n_steps - 1), desc="Steps completed"):
+                if self._system.uses_solana:
+                    updates = await self._system.initialStep() if step == -1 else await self._system.step(state, history)
                 else:
-                    updates = (
-                        await self._system.step(state, history)
-                        if isinstance(self._system, BaseSolanaSystem)
-                        else self._system.step(state, history)
-                    )
+                    updates = self._system.initialStep() if step == -1 else self._system.step(state, history)
                 state = {**state, **updates, "step": step}
                 history.append(state)
                 results.append(self._filter_state(state))
         finally:
-            if isinstance(self._system, BaseSolanaSystem):
-                await self._system.tearDown()
+            if self._system.uses_solana:
+                await self._system.tearDown()  # type: ignore
         return pd.DataFrame(results)
 
     def _filter_state(self, state: StateType) -> StateType:

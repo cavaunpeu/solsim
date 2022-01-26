@@ -1,0 +1,3 @@
+[submodule "examples/drunken_escrow/anchor-escrow-program"]
+	path = examples/drunken_escrow/anchor-escrow-program
+	url = https://github.com/cavaunpeu/anchor-escrow-program.git
