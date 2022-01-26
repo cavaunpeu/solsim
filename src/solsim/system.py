@@ -24,6 +24,10 @@ class BaseSystem(ABC):
     def step(self, state: StateType, history: List[StateType]) -> Awaitable[Any]:
         raise NotImplementedError
 
+    @property
+    def uses_solana(self):
+        return isinstance(self, BaseSolanaSystem)
+
 
 class BaseSolanaSystem(BaseSystem):
 

@@ -14,7 +14,6 @@ class Simulation:
         self._system = system
         self._watchlist = set(watchlist)
         self._n_steps = n_steps
-        self._system_uses_solana = isinstance(self._system, BaseSolanaSystem)
 
     def run(self) -> pd.DataFrame:
         return asyncio.run(self._run())
@@ -28,20 +27,20 @@ class Simulation:
                 if step == -1:
                     updates = (
                         await self._system.initialStep()
-                        if self._system_uses_solana
+                        if self._system.uses_solana
                         else self._system.initialStep()
                     )
                 else:
                     updates = (
                         await self._system.step(state, history)
-                        if self._system_uses_solana
+                        if self._system.uses_solana
                         else self._system.step(state, history)
                     )
                 state = {**state, **updates, "step": step}
                 history.append(state)
                 results.append(self._filter_state(state))
         finally:
-            if self._system_uses_solana:
+            if self._system.uses_solana:
                 await self._system.tearDown()
         return pd.DataFrame(results)
 
