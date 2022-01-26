@@ -1,7 +1,5 @@
 import asyncio
 from collections.abc import Iterable
-import subprocess
-import time
 from typing import Dict, List, Set, Union
 
 import pandas as pd
@@ -18,16 +16,7 @@ class Simulation:
         self._n_steps = n_steps
         self._system_uses_solana = isinstance(self._system, BaseSolanaSystem)
 
-    @property
-    def _localnet_ready(self):
-        lastline = subprocess.check_output(["tail", "-n", "1", self._system.logfile.name]).decode("utf-8").strip()
-        return '| Processed Slot: ' in lastline
-
     def run(self) -> pd.DataFrame:
-        if self._system_uses_solana:
-            print('Waiting for Solana localnet cluster to start (~10s) ...')
-            while not self._localnet_ready:
-                time.sleep(1)
         return asyncio.run(self._run())
 
     async def _run(self) -> pd.DataFrame:
