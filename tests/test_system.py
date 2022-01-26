@@ -24,7 +24,7 @@ def solana_client():
 def solana_system(solana_client):
     class SomeSolanaSystem(BaseSolanaSystem):
         def __init__(self, workspace_dir=os.path.join(os.path.dirname(__file__), "idls")):
-            super().__init__(workspace_dir, client=solana_client)
+            super().__init__(workspace_dir, client=solana_client, start_localnet=False)
 
         def initialStep(self) -> Dict:
             return {"a": 1}
