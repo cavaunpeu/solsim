@@ -38,7 +38,7 @@ class BaseSolanaSystem(BaseSystem):
         if start_localnet:
             self._logfile = tempfile.NamedTemporaryFile()
             self._localnet = self._start_localnet(workspace_dir)
-            print('Waiting for Solana localnet cluster to start (~10s) ...')
+            print("Waiting for Solana localnet cluster to start (~10s) ...")
             while not self._localnet_ready:
                 time.sleep(1)
         else:
@@ -48,14 +48,14 @@ class BaseSolanaSystem(BaseSystem):
 
     def _start_localnet(self, workspace_dir):
         for proc in psutil.process_iter():
-            if proc.name() == 'solana-test-validator':
+            if proc.name() == "solana-test-validator":
                 self._terminate_processes([proc])
-        return subprocess.Popen(['anchor', 'localnet'], cwd=workspace_dir, stdout=self._logfile, stderr=DEVNULL)
+        return subprocess.Popen(["anchor", "localnet"], cwd=workspace_dir, stdout=self._logfile, stderr=DEVNULL)
 
     @property
     def _localnet_ready(self):
         lastline = subprocess.check_output(["tail", "-n", "1", self._logfile.name]).decode("utf-8").strip()
-        return '| Processed Slot: ' in lastline
+        return "| Processed Slot: " in lastline
 
     async def tearDown(self) -> None:
         await close_workspace(self.workspace)
@@ -80,7 +80,6 @@ class BaseSolanaSystem(BaseSystem):
 
         if alive:
             raise Exception(f"could not terminated process {alive}")
-
 
     def _terminate_localnet(self) -> None:
         """
