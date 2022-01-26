@@ -8,13 +8,13 @@
 
 [![Discord Chat](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/sxy4zxBckh)
 
-solsim is the Solana complex systems simulator. It simulates behavior of dynamical systems—e.g. DeFi protocols, DAO governance, cryptocurrencies—built on the [Solana](https://solana.com/) blockchain.
+solsim is the Solana complex systems simulator. It simulates behavior of dynamical systems—DeFi protocols, DAO governance, cryptocurrencies, and more—built on the [Solana](https://solana.com/) blockchain.
 
 ## Philosophy
 
 Define your system how you see fit.
 
-solsim will simulate its behavior and its collect results in a straightforward, structured manner.
+solsim will simulate its behavior and collect its results in a straightforward, structured manner.
 
 ## Usage
 
@@ -94,7 +94,7 @@ See the [drunken escrow](https://github.com/cavaunpeu/solsim/tree/main/examples/
 
 #### Example
 
-See the [Lotka-Volterra](https://github.com/cavaunpeu/solsim/tree/main/examples/drunken_escrow) system, inspired by [cadCAD Edu](https://www.cadcad.education/).
+See the [Lotka-Volterra](https://github.com/cavaunpeu/solsim/tree/main/examples/lotka_volterra) system, inspired by [cadCAD Edu](https://www.cadcad.education/).
 
 ## Inspiration
 

@@ -46,15 +46,7 @@ class SimpleEscrow:
             [bytes(self.swap_state.public_key)], self.program.program_id
         )
 
-    async def initialize(self, reset_balances=True):
-        await self._get_assoc_token_accounts()
-        await self._init_maker_assoc_token_accounts()
-        await self._init_taker_assoc_token_accounts()
-        if reset_balances:
-            await self._reset_assoc_token_acct_balances()
-        await self._init_escrow()
-
-    async def _get_assoc_token_accounts(self):
+    async def get_assoc_token_accounts(self):
         self.assoc_token_accts = {
             "maker": {
                 "foo": get_associated_token_address(self.maker.public_key, self.foo_coin_mint),
@@ -66,7 +58,7 @@ class SimpleEscrow:
             },
         }
 
-    async def _init_maker_assoc_token_accounts(self):
+    async def init_maker_assoc_token_accounts(self):
         await self.program.rpc["init_maker_assoc_token_accts"](
             ctx=Context(
                 accounts={
@@ -85,7 +77,7 @@ class SimpleEscrow:
             )
         )
 
-    async def _init_taker_assoc_token_accounts(self):
+    async def init_taker_assoc_token_accounts(self):
         await self.program.rpc["init_taker_assoc_token_accts"](
             ctx=Context(
                 accounts={
@@ -104,7 +96,7 @@ class SimpleEscrow:
             )
         )
 
-    async def _init_escrow(self):
+    async def initialize(self):
         await self.program.rpc["init_escrow"](
             self.escrow_account_bump,
             ctx=Context(
@@ -121,7 +113,7 @@ class SimpleEscrow:
             ),
         )
 
-    async def _reset_assoc_token_acct_balances(self):
+    async def reset_assoc_token_acct_balances(self):
         await self.program.rpc["reset_assoc_token_acct_balances"](
             self.foo_coin_mint_bump,
             self.bar_coin_mint_bump,
@@ -186,7 +178,7 @@ class SimpleEscrow:
 class SimpleEscrowSystem(BaseSolanaSystem):
     def __init__(self, workspace_dir: str, init_assoc_token_acct_balance: int, num_escrows: int):
         super().__init__(workspace_dir)
-        self._escrow_program = self.workspace["simple_escrow"]
+        self._escrow_program = self.workspace["anchor_escrow_program"]
         self.payer = self._escrow_program.provider.wallet.public_key
         self.init_assoc_token_acct_balance = init_assoc_token_acct_balance
         self.agents = [Keypair() for _ in range(num_escrows * 2)]
@@ -196,7 +188,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
         random.shuffle(agents)
         return [tuple(agents[i : i + 2]) for i in range(0, len(agents), 2)]
 
-    async def _compose_escrows(self, reset_balances):
+    async def _compose_escrows(self, step):
         pairs = self._compose_maker_taker_pairs()
         escrows = []
         for maker, taker in pairs:
@@ -211,7 +203,12 @@ class SimpleEscrowSystem(BaseSolanaSystem):
                 self._escrow_program,
                 self.init_assoc_token_acct_balance,
             )
-            await escrow.initialize(reset_balances)
+            await escrow.get_assoc_token_accounts()
+            if step == -1:
+                await escrow.init_maker_assoc_token_accounts()
+                await escrow.init_taker_assoc_token_accounts()
+                await escrow.reset_assoc_token_acct_balances()
+            await escrow.initialize()
             escrows.append(escrow)
         return escrows
 
@@ -249,8 +246,8 @@ class SimpleEscrowSystem(BaseSolanaSystem):
             terms = (None, None)
         return terms
 
-    async def _swap(self, reset_balances=False):
-        escrows = await self._compose_escrows(reset_balances)
+    async def _swap(self, step: int):
+        escrows = await self._compose_escrows(step)
         amounts = []
         for escrow in escrows:
             terms = self._propose_escrow_terms(escrow)
@@ -277,14 +274,14 @@ class SimpleEscrowSystem(BaseSolanaSystem):
 
     async def initialStep(self) -> Dict:
         await self._init_mints()
-        escrows, amounts = await self._swap(reset_balances=True)
+        escrows, amounts = await self._swap(step=-1)
         return {
             **self._compute_swap_amount_stats(amounts),
             **self._compute_balance_spread_stats(escrows),
         }
 
     async def step(self, state, history) -> Dict:
-        escrows, amounts = await self._swap(reset_balances=False)
+        escrows, amounts = await self._swap(step=len(history) - 1)
         return {
             **self._compute_swap_amount_stats(amounts),
             **self._compute_balance_spread_stats(escrows),
