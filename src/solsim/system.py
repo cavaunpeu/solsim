@@ -5,7 +5,7 @@ import signal
 import subprocess
 from subprocess import DEVNULL
 import tempfile
-from typing import Awaitable, Dict, Optional, Set, List, Any, Union
+from typing import Awaitable, Optional, List, Any
 
 from anchorpy import create_workspace, close_workspace
 from psutil import Process
@@ -34,15 +34,18 @@ class BaseSolanaSystem(BaseSystem):
 
     SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
-    def __init__(self, workspace_dir: str, client: Optional[Client] = None, start_localnet: bool = True) -> None:
-        if start_localnet:
+    def __init__(
+        self, workspace_dir: str, client: Optional[Client] = None, localnet_process: Optional[Process] = None
+    ) -> None:
+        if not localnet_process:
             self._logfile = tempfile.NamedTemporaryFile()
             self._localnet = self._start_localnet(workspace_dir)
             print("Waiting for Solana localnet cluster to start (~10s) ...")
             while not self._localnet_ready:
                 time.sleep(1)
         else:
-            self._localnet = None  # type: ignore
+            self._localnet = localnet_process
+
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
@@ -83,7 +86,7 @@ class BaseSolanaSystem(BaseSystem):
 
     def _terminate_localnet(self) -> None:
         """
-        Borrowed from https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L35.
+        Borrowed from https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L35.  # noqa E501
         """
         parent = psutil.Process(self._localnet.pid)
         try:
@@ -97,7 +100,7 @@ class BaseSolanaSystem(BaseSystem):
 
     def _signal_process(self, p: Process, sig: signal.Signals) -> None:
         """
-        Borrowed from: https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L29.
+        Borrowed from: https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L29.  # noqa E501
         """
         try:
             p.send_signal(sig)
