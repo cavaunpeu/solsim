@@ -97,7 +97,7 @@ jobs:
       #              run test suite
       #----------------------------------------------
       - name: Run tests
-        run: poetry run pytest tests/test_${{ matrix.node }}.py
+        run: poetry run pytest tests/test_${{ matrix.node }}.py -m "not uses_solana_localnet"
 
   Success:
     # https://github.community/t/is-it-possible-to-require-all-github-actions-tasks-to-pass-without-enumerating-them/117957/4?u=graingert
