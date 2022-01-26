@@ -11,12 +11,7 @@ from solsim.system import BaseSolanaSystem
 
 
 class SomeSolanaSystem(BaseSolanaSystem):
-    def __init__(
-        self,
-        client,
-        localnet_process = None,
-        workspace_dir=os.path.join(os.path.dirname(__file__), "idls")
-    ):
+    def __init__(self, client, localnet_process=None, workspace_dir=os.path.join(os.path.dirname(__file__), "idls")):
         super().__init__(workspace_dir, client=client, localnet_process=localnet_process)
 
     async def initialStep(self) -> Dict:
@@ -54,9 +49,9 @@ def test_get_token_account_balance(solana_client, solana_localnet_process):
 
 
 def test_solana_localnet_process(mocker, solana_client, solana_localnet_process):
-    mocker.patch('psutil.Process', return_value=solana_localnet_process)
+    mocker.patch("psutil.Process", return_value=solana_localnet_process)
     system = SomeSolanaSystem(solana_client, solana_localnet_process)
-    simulation = Simulation(system, watchlist=('a'), n_steps=5)
+    simulation = Simulation(system, watchlist=("a"), n_steps=5)
     simulation.run()
 
     solana_localnet_process.send_signal.assert_called_once_with(SIGTERM)

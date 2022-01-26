@@ -34,7 +34,9 @@ class BaseSolanaSystem(BaseSystem):
 
     SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
-    def __init__(self, workspace_dir: str, client: Optional[Client] = None, localnet_process: Optional[Process] = None) -> None:
+    def __init__(
+        self, workspace_dir: str, client: Optional[Client] = None, localnet_process: Optional[Process] = None
+    ) -> None:
         if not localnet_process:
             self._logfile = tempfile.NamedTemporaryFile()
             self._localnet = self._start_localnet(workspace_dir)
