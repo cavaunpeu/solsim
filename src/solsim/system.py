@@ -45,6 +45,7 @@ class BaseSolanaSystem(BaseSystem):
                 time.sleep(1)
         else:
             self._localnet = localnet_process
+
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
