@@ -24,7 +24,7 @@ class Simulation:
             state: StateType = {}
             history: list[StateType] = []
             results: list[StateType] = []
-            for step in tqdm(range(-1, self._n_steps), desc="Steps completed"):
+            for step in tqdm(range(-1, self._n_steps - 1), desc="Steps completed"):
                 if step == -1:
                     updates = (
                         await self._system.initialStep()
