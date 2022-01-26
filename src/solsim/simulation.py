@@ -1,6 +1,8 @@
 import asyncio
-from typing import Dict, List, Set, Union
 from collections.abc import Iterable
+import subprocess
+import time
+from typing import Dict, List, Set, Union
 
 import pandas as pd
 from tqdm.auto import tqdm
@@ -14,8 +16,18 @@ class Simulation:
         self._system = system
         self._watchlist = set(watchlist)
         self._n_steps = n_steps
+        self._system_uses_solana = isinstance(self._system, BaseSolanaSystem)
+
+    @property
+    def _localnet_ready(self):
+        lastline = subprocess.check_output(["tail", "-n", "1", self._system.logfile.name]).decode("utf-8").strip()
+        return '| Processed Slot: ' in lastline
 
     def run(self) -> pd.DataFrame:
+        if self._system_uses_solana:
+            print('Waiting for Solana localnet cluster to start (~10s) ...')
+            while not self._localnet_ready:
+                time.sleep(1)
         return asyncio.run(self._run())
 
     async def _run(self) -> pd.DataFrame:
@@ -27,20 +39,20 @@ class Simulation:
                 if step == -1:
                     updates = (
                         await self._system.initialStep()
-                        if isinstance(self._system, BaseSolanaSystem)
+                        if self._system_uses_solana
                         else self._system.initialStep()
                     )
                 else:
                     updates = (
                         await self._system.step(state, history)
-                        if isinstance(self._system, BaseSolanaSystem)
+                        if self._system_uses_solana
                         else self._system.step(state, history)
                     )
                 state = {**state, **updates, "step": step}
                 history.append(state)
                 results.append(self._filter_state(state))
         finally:
-            if isinstance(self._system, BaseSolanaSystem):
+            if self._system_uses_solana:
                 await self._system.tearDown()
         return pd.DataFrame(results)
 
