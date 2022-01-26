@@ -179,7 +179,6 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     def __init__(self, workspace_dir: str, init_assoc_token_acct_balance: int, num_escrows: int):
         super().__init__(workspace_dir)
         self._escrow_program = self.workspace["anchor_escrow_program"]
-        # self._escrow_program = self.workspace["simple_escrow"]
         self.payer = self._escrow_program.provider.wallet.public_key
         self.init_assoc_token_acct_balance = init_assoc_token_acct_balance
         self.agents = [Keypair() for _ in range(num_escrows * 2)]
