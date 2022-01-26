@@ -94,7 +94,7 @@ See the [drunken escrow](https://github.com/cavaunpeu/solsim/tree/main/examples/
 
 #### Example
 
-See the [Lotka-Volterra](https://github.com/cavaunpeu/solsim/tree/main/examples/drunken_escrow) system, inspired by [cadCAD Edu](https://www.cadcad.education/).
+See the [Lotka-Volterra](https://github.com/cavaunpeu/solsim/tree/main/examples/lotka_volterra) system, inspired by [cadCAD Edu](https://www.cadcad.education/).
 
 ## Inspiration
 
