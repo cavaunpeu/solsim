@@ -24,18 +24,10 @@ class Simulation:
             history: list[StateType] = []
             results: list[StateType] = []
             for step in tqdm(range(-1, self._n_steps - 1), desc="Steps completed"):
-                if step == -1:
-                    updates = (
-                        await self._system.initialStep()
-                        if self._system.uses_solana
-                        else self._system.initialStep()
-                    )
+                if self._system.uses_solana:
+                    updates = await self._system.initialStep() if step == -1 else await self._system.step(state, history)
                 else:
-                    updates = (
-                        await self._system.step(state, history)
-                        if self._system.uses_solana
-                        else self._system.step(state, history)
-                    )
+                    updates = self._system.initialStep() if step == -1 else self._system.step(state, history)
                 state = {**state, **updates, "step": step}
                 history.append(state)
                 results.append(self._filter_state(state))
