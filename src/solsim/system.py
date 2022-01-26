@@ -60,6 +60,21 @@ class BaseSolanaSystem(BaseSystem):
     ) -> float:
         return float(self.client.get_token_account_balance(pubkey, commitment)["result"]["value"]["uiAmount"])
 
+    def _terminate_processes(self, kill_list: list[int], timeout: int):
+        # Attempt graceful termination first.
+        for p in reversed(kill_list):
+            self._signal_process(p, signal.SIGTERM)
+        _, alive = psutil.wait_procs(kill_list, timeout=timeout)
+
+        # Forcefully terminate procs still running.
+        for p in alive:
+            self._signal_process(p, signal.SIGKILL)
+        _, alive = psutil.wait_procs(kill_list, timeout=timeout)
+
+        if alive:
+            raise Exception(f"could not terminated process {alive}")
+
+
     def _terminate_localnet(self, timeout=10) -> None:
         """
         Borrowed from https://github.com/pytest-dev/pytest-xprocess/blob/6dac644e7b6b17d9b970f6e9e2bf2ade539841dc/xprocess/xprocess.py#L35.
@@ -68,19 +83,7 @@ class BaseSolanaSystem(BaseSystem):
         try:
             kill_list = [parent]
             kill_list += parent.children(recursive=True)
-
-            # Attempt graceful termination first.
-            for p in reversed(kill_list):
-                self._signal_process(p, signal.SIGTERM)
-            _, alive = psutil.wait_procs(kill_list, timeout=timeout)
-
-            # Forcefully terminate procs still running.
-            for p in alive:
-                self._signal_process(p, signal.SIGKILL)
-            _, alive = psutil.wait_procs(kill_list, timeout=timeout)
-
-            if alive:
-                raise Exception(f"could not terminated process {alive}")
+            self._terminate_processes(kill_list, timeout)
         except (psutil.Error, ValueError) as err:
             raise Exception(f"Error while terminating process {err}")
         else:
