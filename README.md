@@ -75,7 +75,7 @@ results = simulation.run()
 
 ## Installation
 
-Install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust).
+Install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust). Then,
 
 ```sh
 pip install solsim
@@ -83,7 +83,7 @@ pip install solsim
 
 ### Development setup
 
-Install [poetry](https://python-poetry.org/).
+Install [poetry](https://python-poetry.org/). Then,
 
 ```sh
 git clone https://github.com/cavaunpeu/solsim.git
