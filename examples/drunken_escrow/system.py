@@ -1,10 +1,8 @@
-from collections import defaultdict
-import os
 import random
 from typing import Dict, Tuple
 
 
-from anchorpy import create_workspace, close_workspace, Context
+from anchorpy import Context
 import numpy as np
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
@@ -175,7 +173,7 @@ class SimpleEscrow:
         )
 
 
-class SimpleEscrowSystem(BaseSolanaSystem):
+class DrunkenEscrowSystem(BaseSolanaSystem):
     def __init__(self, workspace_dir: str, init_assoc_token_acct_balance: int, n_escrows: int):
         super().__init__(workspace_dir)
         self._escrow_program = self.workspace["anchor_escrow_program"]
@@ -186,7 +184,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
     def _compose_maker_taker_pairs(self):
         agents = list(self.agents)
         random.shuffle(agents)
-        return [tuple(agents[i : i + 2]) for i in range(0, len(agents), 2)]
+        return [tuple(agents[i : i + 2]) for i in range(0, len(agents), 2)]  # noqa: E203
 
     async def _compose_escrows(self, step):
         pairs = self._compose_maker_taker_pairs()
@@ -264,7 +262,7 @@ class SimpleEscrowSystem(BaseSolanaSystem):
             for role in ["maker", "taker"]:
                 spread = abs(
                     self.get_token_account_balance(escrow.assoc_token_accts[role]["foo"])
-                    - self.get_token_account_balance(escrow.assoc_token_accts[role]["bar"])
+                    - self.get_token_account_balance(escrow.assoc_token_accts[role]["bar"])  # noqa: W503
                 )
                 spreads.append(spread)
         return {"mean_balance_spread": np.mean(spreads)}

@@ -18,6 +18,14 @@ jobs:
         with:
           options: --line-length ${{ env.max_line_length }} --check
           src: "./src"
+      - uses: psf/black@stable
+        with:
+          options: --line-length ${{ env.max_line_length }} --check
+          src: "./tests"
+      - uses: psf/black@stable
+        with:
+          options: --line-length ${{ env.max_line_length }} --check
+          src: "./examples"
   mypy:
     runs-on: ubuntu-latest
     steps:
@@ -43,4 +51,8 @@ jobs:
       - uses: py-actions/flake8@v2
         with:
           path: tests
+          max-line-length: ${{ env.max_line_length }}
+      - uses: py-actions/flake8@v2
+        with:
+          path: examples
           max-line-length: ${{ env.max_line_length }}

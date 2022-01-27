@@ -14,7 +14,7 @@ solsim is the Solana complex systems simulator. It simulates behavior of dynamic
 
 Define your system how you see fit.
 
-solsim will simulate its behavior and collect its results in a straightforward, structured manner.
+solsim will simulate its behavior and collect its results in a structured, straightforward manner.
 
 ## Usage
 
@@ -24,7 +24,58 @@ solsim will simulate its behavior and collect its results in a straightforward, 
 4. Instantiate a Simulation, call .run().
 5. Receive a [pandas](https://pandas.pydata.org/) DataFrame containing values of "watched" variables at each step in time.
 
+### Example
+
+```python
+from anchorpy import Context
+from solana.keypair import Keypair
+from solsim.simulation import Simulation
+
+# Using solana
+
+class SomeSolanaSystem(BaseSolanaSystem):
+    def __init__(self):
+        super().__init__("path/to/workspace")
+        self.account = Keypair()
+        self.pubkey = self.account.public_key
+        self.program = self.workspace["my_anchor_program"]  # solsim gives a Anchor program workspace (self.workspace).
+
+    async def initialStep(self):
+        self.program.rpc["initialize"]()  # Make RPC calls to your Anchor program.
+        await self.client.request_airdrop(self.pubkey, 10)  # solsim gives you a Solana API client (self.client).
+        return {"balance": await self.client.get_balance(self.pubkey)}
+
+    async def step(self, state, history):
+        self.program.rpc["submit_uniswap_trade"](
+            ctx=Context(accounts={"account": self.pubkey}, signers=[self.account])
+        )
+        return {"balance": await self.client.get_balance(self.account)}
+
+
+simulation = Simulation(system=SomeSolanaSystem(), watchlist=("balance"), n_steps=5)
+results = simulation.run()  # Returns pandas DataFrame of results.
+
+
+# Not using solana
+
+class SomeSystem(BaseSystem):
+    def __init__(self, population):
+        self.pop = population
+
+    def initialStep(self):
+        return {"population": self.pop}
+
+    def step(self, state, history):
+        return {"population": state["population"] * 1.1}
+
+
+simulation = Simulation(system=SomeSystem(), watchlist=("population"), n_steps=5)
+results = simulation.run()
+```
+
 ## Installation
+
+Install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust).
 
 ```sh
 pip install solsim
@@ -32,9 +83,7 @@ pip install solsim
 
 ### Development setup
 
-First, install [poetry](https://python-poetry.org/).
-
-Then:
+Install [poetry](https://python-poetry.org/).
 
 ```sh
 git clone https://github.com/cavaunpeu/solsim.git
@@ -45,28 +94,15 @@ poetry shell
 
 ## Detailed usage
 
-### Systems using Solana
+### Using Solana
 
-First, write the Solana programs in Rust or [Anchor](https://project-serum.github.io/anchor/getting-started/introduction.html) that comprise your system.
+First, write your Solana program. solsim prefers you do this in [Anchor](https://project-serum.github.io/anchor/getting-started/introduction.html). Then,
 
-Next, copy the generated idl.json for each into a directory (e.g. named `workspace`) built as such:
+1. Write a system class that inherits from `BaseSolanaSystem`.
+2. Call `super().__init__("path/to/program")` in its `__init__`.
+3. Implement `initialStep` and `step` methods. (Since you'll interact with Solana asynchronously, these methods should be `async`.)
 
-```
-workspace
-└── target
-    └── idl
-        ├── program1.json
-        ├── program2.json
-        └── program3.json
-```
-
-Then,
-
-1. Build a system class that inherits from `BaseSolanaSystem`.
-2. Implement `initialStep` and `step` methods.
-3. Call `super().__init__("workspace")` in its `__init__`.
-
-In `3`, solsim exposes the following attributes to your system:
+In `2.`, solsim exposes the following attributes to your system instance:
 
 - `self.workspace`: IDL clients for the Solana programs that comprise your system (via [anchorpy](https://github.com/kevinheavey/anchorpy)).
 
@@ -81,20 +117,53 @@ Finally,
 1. Define a `watchlist`: variables (returned in `initialStep` and `step`) you'd like to "watch."
 2. Instantiate and run your simulation, e.g. `Simulation(MySystem(), watchlist, n_steps=10).run()`.
 
-#### Example
+### Not using Solana
 
-See the [drunken escrow](https://github.com/cavaunpeu/solsim/tree/main/examples/drunken_escrow) system.
-
-### Systems not using Solana
-
-1. Build a system class that inherits from `BaseSystem`.
+1. Write a system class that inherits from `BaseSystem`.
 2. Implement `initialStep` and `step` methods.
-3. Define a `watchlist`: variables (returned in `initialStep` and `step`) you'd like to "watch."
-4. Instantiate and run your simulation, e.g. `Simulation(MySystem(), watchlist, n_steps=10).run()`.
+3. Define a `watchlist`.
+4. Instantiate and run your simulation.
 
-#### Example
+## Examples
 
-See the [Lotka-Volterra](https://github.com/cavaunpeu/solsim/tree/main/examples/lotka_volterra) system, inspired by [cadCAD Edu](https://www.cadcad.education/).
+### Drunken escrow (w/ Solana)
+
+Agents are randomly paired to exchange random amounts of `foo_coin` and `bar_coin` via an Anchor escrow contract in each timestep.
+
+- Run: `python -m examples.drunken_escrow`.
+- Code: [here](https://github.com/cavaunpeu/solsim/tree/main/examples/drunken_escrow).
+- Expected output (numbers may vary):
+
+```
+(.venv) ➜  solsim git:(main) $ python -m examples.drunken_escrow
+Waiting for Solana localnet cluster to start (~10s) ...
+Steps completed: 100%|████████████████████████████████████████████████████████████████████████████████████| 4/4 [00:27<00:00,  6.82s/it]
+   step  mean_balance_spread  mean_swap_amount  num_swaps
+0    -1            40.000000         30.666667          3
+1     0            58.000000         12.000000          3
+2     1            60.666667          4.000000          3
+3     2            83.333333         21.500000          2
+```
+
+### Lotka-Volterra (w/o Solana)
+
+The Lotka-Volterra model is a classic dynamical system in the field of ecology that tracks the evolution of interdependent predator and prey populations.
+
+- Run: `python -m examples.lotka_volterra`.
+- Code: [here](https://github.com/cavaunpeu/solsim/tree/main/examples/lotka_volterra).
+- Expected output:
+
+```
+(.venv) ➜  solsim git:(main) ✗ python -m examples.lotka_volterra
+Steps completed: 100%|█████████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00, 28581.29it/s]
+   step  food_supply  population_size
+0    -1     1000.000            50.00
+1     0      995.000            60.00
+2     1      989.000            69.95
+3     2      982.005            79.84
+```
+
+This implementation inspired by [cadCAD Edu](https://www.cadcad.education/).
 
 ## Inspiration
 
