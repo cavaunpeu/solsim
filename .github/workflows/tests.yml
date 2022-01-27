@@ -1,4 +1,4 @@
-name: Tests  # borrowed from: https://github.com/kevinheavey/anchorpy/blob/main/.github/workflows/tests.yml
+name: Test  # borrowed from: https://github.com/kevinheavey/anchorpy/blob/main/.github/workflows/tests.yml
 on:
   push:
     branches: [main]
