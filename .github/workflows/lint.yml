@@ -1,0 +1,46 @@
+name: Lint  # borrowed from: https://github.com/kevinheavey/anchorpy/blob/main/.github/workflows/tests.yml
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  python_version: 3.10.2
+  max_line_length: 125
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          options: --line-length ${{ env.max_line_length }} --check
+          src: "./src"
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ env.python_version }}
+      - run: |
+          pip install mypy
+      - run: |
+          mypy src/ --config-file mypy.ini --strict
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ env.python_version }}
+      - uses: py-actions/flake8@v2
+        with:
+          path: src
+          max-line-length: ${{ env.max_line_length }}
+      - uses: py-actions/flake8@v2
+        with:
+          path: tests
+          max-line-length: ${{ env.max_line_length }}
