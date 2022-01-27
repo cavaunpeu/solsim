@@ -175,7 +175,7 @@ class SimpleEscrow:
         )
 
 
-class SimpleEscrowSystem(BaseSolanaSystem):
+class DrunkenEscrowSystem(BaseSolanaSystem):
     def __init__(self, workspace_dir: str, init_assoc_token_acct_balance: int, n_escrows: int):
         super().__init__(workspace_dir)
         self._escrow_program = self.workspace["anchor_escrow_program"]

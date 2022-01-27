@@ -1,20 +1,20 @@
 import os
 
-from .system import SimpleEscrowSystem
+from .system import DrunkenEscrowSystem
 from solsim.simulation import Simulation
 
 
-def main(n_escrows=3, n_steps=3):
+def main(n_escrows=3, n_steps=4):
     simulation = Simulation(
-        system=SimpleEscrowSystem(
+        system=DrunkenEscrowSystem(
             workspace_dir=os.path.join(os.path.dirname(__file__), "anchor-escrow-program"),
             init_assoc_token_acct_balance=100,
-            n_escrows=3,
+            n_escrows=n_escrows,
         ),
         watchlist=("num_swaps", "mean_swap_amount", "mean_balance_spread"),
-        n_steps=3,
+        n_steps=n_steps,
     )
-    results = simulation.run()
+    return simulation.run()
 
 
 if __name__ == "__main__":
