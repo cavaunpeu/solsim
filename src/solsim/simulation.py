@@ -34,10 +34,16 @@ class Simulation:
         finally:
             if self._system.uses_solana:
                 await self._system.tearDown()  # type: ignore
-        return pd.DataFrame(results)
+        results = pd.DataFrame(results)
+        return self._reorder_results_columns(results)
 
     def _filter_state(self, state: StateType) -> StateType:
         for qty in self._watchlist:
             if qty not in state:
                 raise Exception(f"{qty} not found in state: {state}")
         return {qty: state[qty] for qty in self._watchlist | {"step"}}
+
+    @staticmethod
+    def _reorder_results_columns(results: pd.DataFrame) -> pd.DataFrame:
+        cols = ["step"] + sorted([col for col in results.columns if col != "step"])
+        return results[cols]
