@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Any, Dict
 
 
-StateType = Dict[str, Union[str, int, float]]
+StateType = Dict[Any, Any]

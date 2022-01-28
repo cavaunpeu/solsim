@@ -75,7 +75,9 @@ results = simulation.run()
 
 ## Installation
 
-Install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust). Then,
+First, install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust).
+
+### Library setup
 
 ```sh
 pip install solsim
