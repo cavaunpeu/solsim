@@ -16,7 +16,12 @@ from solana.rpc import commitment
 from solsim.type import StateType
 
 
-class BaseSystem(ABC):
+class BaseMixin:
+    @property
+    def uses_solana(self) -> bool:
+        return isinstance(self, BaseSolanaSystem)
+
+class BaseSystem(ABC, BaseMixin):
     @abstractmethod
     def initialStep(self) -> StateType:
         """Return initial system state.
@@ -42,12 +47,8 @@ class BaseSystem(ABC):
         """
         raise NotImplementedError
 
-    @property
-    def uses_solana(self) -> bool:
-        return isinstance(self, BaseSolanaSystem)
 
-
-class BaseSolanaSystem(BaseSystem):
+class BaseSolanaSystem(ABC, BaseMixin):
 
     SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
@@ -92,6 +93,7 @@ class BaseSolanaSystem(BaseSystem):
         Returns:
             The initial state of the system.
         """
+        raise NotImplementedError
 
     def _start_localnet(self, workspace_dir: str) -> subprocess.Popen[Any]:
         for proc in psutil.process_iter():
