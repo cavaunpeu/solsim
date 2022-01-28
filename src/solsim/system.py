@@ -21,6 +21,7 @@ class BaseMixin:
     def uses_solana(self) -> bool:
         return isinstance(self, BaseSolanaSystem)
 
+
 class BaseSystem(ABC, BaseMixin):
     @abstractmethod
     def initialStep(self) -> StateType:
