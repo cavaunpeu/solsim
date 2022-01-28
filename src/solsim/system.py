@@ -16,21 +16,40 @@ from solana.rpc import commitment
 from solsim.type import StateType
 
 
-class BaseSystem(ABC):
-    @abstractmethod
-    def initialStep(self) -> Awaitable[Any]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def step(self, state: StateType, history: List[StateType]) -> Awaitable[Any]:
-        raise NotImplementedError
-
+class BaseMixin:
     @property
     def uses_solana(self) -> bool:
         return isinstance(self, BaseSolanaSystem)
 
 
-class BaseSolanaSystem(BaseSystem):
+class BaseSystem(ABC, BaseMixin):
+    @abstractmethod
+    def initialStep(self) -> StateType:
+        """Return initial system state.
+
+        Returns:
+            The initial state of the system.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def step(self, state: StateType, history: List[StateType]) -> StateType:
+        """Return an arbitrary state of the system.
+
+        This method is `async` because it (presumably) will make RPC calls
+        to the Solana blockchain, which are `async`.
+
+        Args:
+            state: The previous system state.
+            history: The full history of system states.
+
+        Returns:
+            The initial state of the system.
+        """
+        raise NotImplementedError
+
+
+class BaseSolanaSystem(ABC, BaseMixin):
 
     SOLANA_CLUSTER_URI = "http://127.0.0.1:8899"
 
@@ -48,6 +67,34 @@ class BaseSolanaSystem(BaseSystem):
 
         self.workspace = create_workspace(workspace_dir)
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
+
+    @abstractmethod
+    async def initialStep(self) -> Awaitable[StateType]:
+        """Return initial system state.
+
+        This method is `async` because it (presumably) will make RPC calls
+        to the Solana blockchain, which are `async`.
+
+        Returns:
+            The initial state of the system.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def step(self, state: StateType, history: List[StateType]) -> Awaitable[StateType]:
+        """Return an arbitrary state of the system.
+
+        This method is `async` because it (presumably) will make RPC calls
+        to the Solana blockchain, which are `async`.
+
+        Args:
+            state: The previous system state.
+            history: The full history of system states.
+
+        Returns:
+            The initial state of the system.
+        """
+        raise NotImplementedError
 
     def _start_localnet(self, workspace_dir: str) -> subprocess.Popen[Any]:
         for proc in psutil.process_iter():
@@ -68,6 +115,14 @@ class BaseSolanaSystem(BaseSystem):
     def get_token_account_balance(
         self, pubkey: PublicKey, commitment: Optional[commitment.Commitment] = commitment.Confirmed
     ) -> float:
+        """Get account token balance.
+
+        Args:
+            pubkey: The public key of the account in question.
+
+        Returns:
+            The token balance of the account.
+        """
         return float(self.client.get_token_account_balance(pubkey, commitment)["result"]["value"]["uiAmount"])
 
     def _terminate_processes(self, kill_list: list[Process], timeout: int = 10) -> None:

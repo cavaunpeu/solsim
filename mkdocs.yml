@@ -1,0 +1,38 @@
+site_name: solsim
+nav:
+  - README: index.md
+  - API Reference: api.md
+theme:
+  name: material
+  icon:
+    logo: material/gamepad
+  favicon: img/favicon.svg
+  palette:
+    - scheme: default
+      primary: cyan
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: cyan
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  # custom_dir: overrides
+markdown_extensions:
+  - pymdownx.superfences
+repo_url: https://github.com/cavaunpeu/solsim
+repo_name: cavaunpeu/solsim
+site_url: https://cavaunpeu.github.io/solsim/
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            filters:
+              - "!^_"  # exlude all members starting with _
+              - "^__init__$"  # but always include __init__ modules and methods
+          rendering:
+            show_root_heading: true
+            show_root_full_path: false
+  - search

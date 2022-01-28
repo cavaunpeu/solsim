@@ -1,4 +1,4 @@
-name: Lint  # borrowed from: https://github.com/kevinheavey/anchorpy/blob/main/.github/workflows/tests.yml
+name: Lint
 on:
   push:
     branches: [main]

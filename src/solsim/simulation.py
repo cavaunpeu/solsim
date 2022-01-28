@@ -25,7 +25,7 @@ class Simulation:
             results: list[StateType] = []
             for step in tqdm(range(-1, self._n_steps - 1), desc="Steps completed"):
                 if self._system.uses_solana:
-                    updates = await self._system.initialStep() if step == -1 else await self._system.step(state, history)
+                    updates = await self._system.initialStep() if step == -1 else await self._system.step(state, history)  # type: ignore  # noqa: E501
                 else:
                     updates = self._system.initialStep() if step == -1 else self._system.step(state, history)
                 state = {**state, **updates, "step": step}
