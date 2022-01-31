@@ -46,11 +46,11 @@ class Simulation:
             history: list[StateType] = []
             results: list[StateType] = []
             for run in range(num_runs):
-                for step in tqdm(range(-1, self._n_steps - 1), desc="Steps completed"):
+                for step in tqdm(range(0, self._n_steps), desc="Steps completed"):
                     if self._system.uses_solana:
-                        updates = await self._system.initialStep() if step == -1 else await self._system.step(state, history)  # type: ignore  # noqa: E501
+                        updates = await self._system.initialStep() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
                     else:
-                        updates = self._system.initialStep() if step == -1 else self._system.step(state, history)
+                        updates = self._system.initialStep() if step == 0 else self._system.step(state, history)
                     state = {**state, **updates, "run": run, "step": step}
                     history.append(state)
                     results.append(self._filter_state(state))
