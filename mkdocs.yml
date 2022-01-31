@@ -18,7 +18,6 @@ theme:
       toggle:
         icon: material/toggle-switch
         name: Switch to light mode
-  # custom_dir: overrides
 markdown_extensions:
   - pymdownx.superfences
 repo_url: https://github.com/cavaunpeu/solsim
