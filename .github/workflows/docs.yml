@@ -42,7 +42,7 @@ jobs:
       #----------------------------------------------
       # install your root project
       #----------------------------------------------
-      - name: install library
+      - name: Install library
         run: poetry install --no-interaction
       - name: Deploy docs
         run: poetry run mkdocs gh-deploy --force
