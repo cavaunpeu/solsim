@@ -1,7 +1,7 @@
 # solsim
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/logo.png" width="70%" height="70%">
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/img/logo.png" width="70%" height="70%">
 </div>
 
 ---
@@ -77,7 +77,7 @@ results = simulation.run()
 solsim gives you a streamlit app to explore results, e.g.
 
 <div>
-    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/add-results-viz/img/results_explorer_app.png">
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/img/results_explorer_app.png">
 </div>
 
 ## Installation

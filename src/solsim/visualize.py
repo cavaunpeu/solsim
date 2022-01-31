@@ -14,7 +14,7 @@ watched_vars = [col for col in results.columns if col not in idx_cols]
 
 # Sidebar
 
-st.sidebar.image(os.path.join(os.path.dirname(__file__), "../../logo.png"))
+st.sidebar.image(os.path.join(os.path.dirname(__file__), "../../img/logo.png"))
 
 st.sidebar.markdown("# 👉 Select quantities")
 quantities = st.sidebar.multiselect("State variables or KPIs to explore", watched_vars)
