@@ -87,7 +87,7 @@ pip install solsim
 Install [poetry](https://python-poetry.org/). Then,
 
 ```sh
-git clone https://github.com/cavaunpeu/solsim.git
+git clone --recurse-submodules https://github.com/cavaunpeu/solsim.git
 cd solsim
 poetry install
 poetry shell
