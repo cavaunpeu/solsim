@@ -76,7 +76,9 @@ results = simulation.run()
 
 solsim gives you a streamlit app to explore results, e.g.
 
-![results explorer app](./img/results_explorer_app.png)
+<div>
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/add-results-viz/img/results_explorer_app.png">
+</div>
 
 ## Installation
 
