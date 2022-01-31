@@ -3,7 +3,7 @@ from collections.abc import Iterable
 import os
 import subprocess
 import tempfile
-from typing import Union
+from typing import Any, Union
 
 import feather
 import pandas as pd
@@ -34,7 +34,7 @@ class Simulation:
         return results
 
     @staticmethod
-    def _start_results_app(results, tmpdir):
+    def _start_results_app(results: pd.DataFrame, tmpdir: str) -> subprocess.Popen[Any]:
         results_path = os.path.join(tmpdir, "results.feather")
         feather.write_dataframe(results, results_path)
         env = {**os.environ, "SOLSIM_RESULTS_PATH": results_path}
