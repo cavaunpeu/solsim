@@ -9,7 +9,7 @@ from solsim.simulation import Simulation
 results = feather.read_dataframe(os.environ['SOLSIM_RESULTS_PATH'])
 idx_cols = Simulation.INDEX_COLS
 
-st.markdown("# Results Explorer")
+st.markdown("# 🔬 Results Explorer")
 
 quantities = st.sidebar.multiselect(
     "Quantities to plot",
@@ -17,6 +17,8 @@ quantities = st.sidebar.multiselect(
 )
 
 if quantities:
+
+    st.markdown("## 📈 Graph")
 
     results = results[quantities + idx_cols]
     charts = []
@@ -37,3 +39,7 @@ if quantities:
         charts.append(chart)
 
     st.altair_chart(alt.layer(*charts), use_container_width=True)
+
+    st.markdown("## 📝 Table")
+
+    st.table(results)
