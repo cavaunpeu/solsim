@@ -72,6 +72,12 @@ simulation = Simulation(system=SomeSystem(), watchlist=("population"), n_steps=5
 results = simulation.run()
 ```
 
+## Results Explorer
+
+solsim gives you a streamlit app to explore results, e.g.
+
+![results explorer app](./img/results_explorer_app.png)
+
 ## Installation
 
 First, install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust).
