@@ -23,6 +23,15 @@ class Simulation:
         self._n_steps = n_steps
 
     def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
+        """Run your simulation.
+
+        Args:
+            num_runs: The number of times to run your simulation.
+            visualize_results: Optionally build and start a Streamlit app to explore simulation results.
+
+        Returns:
+            results: A pandas DataFrame containing your simulation results.
+        """
         results = asyncio.run(self._run(num_runs))
         if visualize_results:
             try:
