@@ -1,7 +1,7 @@
 # solsim
 
 <div align="center">
-    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/logo.png" width="70%" height="70%">
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/img/logo.png" width="70%" height="70%">
 </div>
 
 ---
@@ -72,6 +72,14 @@ simulation = Simulation(system=SomeSystem(), watchlist=("population"), n_steps=5
 results = simulation.run()
 ```
 
+## Results Explorer
+
+solsim gives you a streamlit app to explore results, e.g.
+
+<div>
+    <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/img/results_explorer_app.png">
+</div>
+
 ## Installation
 
 First, install [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-rust).
@@ -87,7 +95,7 @@ pip install solsim
 Install [poetry](https://python-poetry.org/). Then,
 
 ```sh
-git clone https://github.com/cavaunpeu/solsim.git
+git clone --recurse-submodules https://github.com/cavaunpeu/solsim.git
 cd solsim
 poetry install
 poetry shell
