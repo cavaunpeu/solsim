@@ -2,8 +2,10 @@ import asyncio
 from collections.abc import Iterable
 import os
 import subprocess
+import tempfile
 from typing import Union
 
+import feather
 import pandas as pd
 from tqdm.auto import tqdm
 
@@ -21,15 +23,19 @@ class Simulation:
         results = asyncio.run(self._run())
         if visualize_results:
             try:
-                app = self._start_results_app(results)
-                app.wait()
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    app = self._start_results_app(results, tmpdir)
+                    app.wait()
             except KeyboardInterrupt:
                 pass
         return results
 
     @staticmethod
-    def _start_results_app(results):
-        return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__))
+    def _start_results_app(results, tmpdir):
+        results_path = os.path.join(tmpdir, "results.feather")
+        feather.write_dataframe(results, results_path)
+        env = {**os.environ, "SOLSIM_RESULTS_PATH": results_path}
+        return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__), env=env)
 
     async def _run(self) -> pd.DataFrame:
         try:
