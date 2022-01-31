@@ -1,5 +1,7 @@
 import asyncio
 from collections.abc import Iterable
+import os
+import subprocess
 from typing import Union
 
 import pandas as pd
@@ -15,8 +17,19 @@ class Simulation:
         self._watchlist = set(watchlist)
         self._n_steps = n_steps
 
-    def run(self) -> pd.DataFrame:
-        return asyncio.run(self._run())
+    def run(self, visualize_results: bool = False) -> pd.DataFrame:
+        results = asyncio.run(self._run())
+        if visualize_results:
+            try:
+                app = self._start_results_app(results)
+                app.wait()
+            except KeyboardInterrupt:
+                pass
+        return results
+
+    @staticmethod
+    def _start_results_app(results):
+        return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__))
 
     async def _run(self) -> pd.DataFrame:
         try:
