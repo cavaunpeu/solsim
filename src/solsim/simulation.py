@@ -10,7 +10,6 @@ import pandas as pd
 from tqdm.auto import tqdm
 import typer
 
-from solsim.cli import build_cli
 from solsim.system import BaseSystem, BaseSolanaSystem
 from solsim.type import StateType
 
@@ -26,7 +25,17 @@ class Simulation:
 
     @property
     def cli(self) -> typer.Typer:
-        return build_cli(self)
+        app = typer.Typer()
+
+        @app.command()
+        def run(num_runs: int = 1, viz_results: bool = False) -> pd.DataFrame:
+            return self.run(num_runs, viz_results)
+
+        @app.callback()
+        def callback() -> None:
+            pass
+
+        return app
 
     def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
