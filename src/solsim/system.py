@@ -24,7 +24,7 @@ class BaseMixin:
 
 class BaseSystem(ABC, BaseMixin):
     @abstractmethod
-    def initialStep(self) -> StateType:
+    def initial_step(self) -> StateType:
         """Return initial system state.
 
         Returns:
@@ -69,7 +69,7 @@ class BaseSolanaSystem(ABC, BaseMixin):
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
 
     @abstractmethod
-    async def initialStep(self) -> Awaitable[StateType]:
+    async def initial_step(self) -> Awaitable[StateType]:
         """Return initial system state.
 
         This method is `async` because it (presumably) will make RPC calls

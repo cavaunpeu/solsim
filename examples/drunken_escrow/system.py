@@ -270,7 +270,7 @@ class DrunkenEscrowSystem(BaseSolanaSystem):
     def _compute_swap_amount_stats(self, amounts):
         return {"num_swaps": len(amounts), "mean_swap_amount": np.mean(amounts)}
 
-    async def initialStep(self) -> Dict:
+    async def initial_step(self) -> Dict:
         await self._init_mints()
         escrows, amounts = await self._swap(step=0)
         return {

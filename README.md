@@ -32,7 +32,7 @@ solsim will simulate its behavior and collect its results in a structured, strai
 
 ## Usage
 
-1. Implement `initialStep` and `step` methods.
+1. Implement `initial_step` and `step` methods.
 2. From each, return the current state, i.e. a dictionary mapping variables to current values.
 3. Specify the variables you'd like to "watch."
 4. Instantiate a Simulation, call `.run()`.
@@ -52,7 +52,7 @@ class SomeSolanaSystem(BaseSolanaSystem):
         self.pubkey = self.account.public_key
         self.program = self.workspace["my_anchor_program"]  # solsim gives a Anchor program workspace (self.workspace).
 
-    async def initialStep(self):
+    async def initial_step(self):
         self.program.rpc["initialize"]()  # Make RPC calls to your Anchor program.
         await self.client.request_airdrop(self.pubkey, 10)  # solsim gives you a Solana API client (self.client).
         return {"balance": await self.client.get_balance(self.pubkey)}
@@ -75,7 +75,7 @@ class SomeSystem(BaseSystem):
     def __init__(self, population):
         self.pop = population
 
-    def initialStep(self):
+    def initial_step(self):
         return {"population": self.pop}
 
     def step(self, state, history):
@@ -135,7 +135,7 @@ First, write your Solana program. solsim prefers you do this in [Anchor](https:/
 
 1. Write a system class that inherits from `BaseSolanaSystem`.
 2. Call `super().__init__("path/to/program")` in its `__init__`.
-3. Implement `initialStep` and `step` methods. (Since you'll interact with Solana asynchronously, these methods should be `async`.)
+3. Implement `initial_step` and `step` methods. (Since you'll interact with Solana asynchronously, these methods should be `async`.)
 
 In `2.`, solsim exposes the following attributes to your system instance:
 
@@ -149,13 +149,13 @@ This client lets you interact with Solana's RPC endpoints. Documentation [here](
 
 Finally,
 
-1. Define a `watchlist`: variables (returned in `initialStep` and `step`) you'd like to "watch."
+1. Define a `watchlist`: variables (returned in `initial_step` and `step`) you'd like to "watch."
 2. Instantiate and run your simulation, e.g. `Simulation(MySystem(), watchlist, n_steps=10).run()`.
 
 ### Without Solana
 
 1. Write a system class that inherits from `BaseSystem`.
-2. Implement `initialStep` and `step` methods.
+2. Implement `initial_step` and `step` methods.
 3. Define a `watchlist`.
 4. Instantiate and run your simulation.
 
