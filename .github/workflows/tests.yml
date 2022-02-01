@@ -17,7 +17,8 @@ jobs:
         node:
           [
             'examples',
-            'system'
+            'system',
+            'simulation'
           ]
     steps:
       - name: Checkout repo
