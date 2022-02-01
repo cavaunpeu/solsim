@@ -35,7 +35,7 @@ solsim will simulate its behavior and collect its results in a structured, strai
 1. Implement `initialStep` and `step` methods.
 2. From each, return the current state, i.e. a dictionary mapping variables to current values.
 3. Specify the variables you'd like to "watch."
-4. Instantiate a Simulation, call .run().
+4. Instantiate a Simulation, call `.run()`.
 5. Receive a [pandas](https://pandas.pydata.org/) DataFrame containing values of "watched" variables at each step in time.
 
 ### With Solana
