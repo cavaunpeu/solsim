@@ -9,6 +9,7 @@
 <!-- Badges -->
 
 [![Discord Chat](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/sxy4zxBckh)
+[![Downloads](https://pepy.tech/badge/solsim)](https://pepy.tech/project/solsim)
 
 <!-- Tests and Lint Badges -->
 
