@@ -8,6 +8,7 @@ from typing import Any, Union
 import feather
 import pandas as pd
 from tqdm.auto import tqdm
+import typer
 
 from solsim.cli import build_cli
 from solsim.system import BaseSystem, BaseSolanaSystem
@@ -24,7 +25,7 @@ class Simulation:
         self._n_steps = n_steps
 
     @property
-    def cli(self):
+    def cli(self) -> typer.Typer:
         return build_cli(self)
 
     def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
