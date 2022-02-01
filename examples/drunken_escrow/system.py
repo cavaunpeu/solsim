@@ -279,7 +279,7 @@ class DrunkenEscrowSystem(BaseSolanaSystem):
         }
 
     async def step(self, state, history) -> Dict:
-        escrows, amounts = await self._swap(step=len(history) - 1)
+        escrows, amounts = await self._swap(step=len(history))
         return {
             **self._compute_swap_amount_stats(amounts),
             **self._compute_balance_spread_stats(escrows),
