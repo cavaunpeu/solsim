@@ -26,6 +26,7 @@ flake8 = "^4.0.1"
 mkdocs = "^1.2.3"
 mkdocs-material = "^8.1.8"
 mkdocstrings = "^0.17.0"
+typer = "^0.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
