@@ -8,15 +8,18 @@
 
 <!-- Badges -->
 
+[![Discord Chat](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/sxy4zxBckh)
 
 <!-- Tests and Lint Badges -->
-
-[![Discord Chat](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/sxy4zxBckh)
 
 <div>
 <img alt="Tests" src="https://github.com/cavaunpeu/solsim/actions/workflows/tests.yml/badge.svg">
 <img alt="Lint" src="https://github.com/cavaunpeu/solsim/actions/workflows/lint.yml/badge.svg">
 </div>
+
+---
+
+## Introduction
 
 solsim is the Solana complex systems simulator. It simulates behavior of dynamical systems—DeFi protocols, DAO governance, cryptocurrencies, and more—built on the [Solana](https://solana.com/) blockchain.
 
