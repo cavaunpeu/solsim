@@ -17,7 +17,8 @@ jobs:
         node:
           [
             'examples',
-            'system'
+            'system',
+            'simulation'
           ]
     steps:
       - name: Checkout repo
@@ -99,7 +100,7 @@ jobs:
       - name: Run tests
         run: poetry run pytest tests/test_${{ matrix.node }}.py -m "not uses_solana_localnet"
 
-  Success:
+  AllTestsPassed:
     # https://github.community/t/is-it-possible-to-require-all-github-actions-tasks-to-pass-without-enumerating-them/117957/4?u=graingert
     runs-on: ubuntu-latest
     needs: Test
