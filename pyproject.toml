@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solsim"
-version = "0.1.5"
+version = "0.1.6"
 description = "The Solana complex systems simulator."
 authors = ["Will Wolf <williamabrwolf@gmail.com>"]
 readme = "README.md"
