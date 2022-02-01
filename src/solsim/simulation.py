@@ -27,11 +27,11 @@ class Simulation:
     def cli(self) -> typer.Typer:
         app = typer.Typer()
 
-        @app.command()
+        @app.command()  # type: ignore
         def run(num_runs: int = 1, viz_results: bool = False) -> pd.DataFrame:
             return self.run(num_runs, viz_results)
 
-        @app.callback()
+        @app.callback()  # type: ignore
         def callback() -> None:
             pass
 
