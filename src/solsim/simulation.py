@@ -8,6 +8,7 @@ from typing import Any, Union
 import feather
 import pandas as pd
 from tqdm.auto import tqdm
+import typer
 
 from solsim.system import BaseSystem, BaseSolanaSystem
 from solsim.type import StateType
@@ -21,6 +22,20 @@ class Simulation:
         self._system = system
         self._watchlist = set(watchlist)
         self._n_steps = n_steps
+
+    @property
+    def cli(self) -> typer.Typer:
+        app = typer.Typer()
+
+        @app.command()  # type: ignore
+        def run(num_runs: int = 1, viz_results: bool = False) -> pd.DataFrame:
+            return self.run(num_runs, viz_results)
+
+        @app.callback()  # type: ignore
+        def callback() -> None:
+            pass
+
+        return app
 
     def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
@@ -55,7 +70,7 @@ class Simulation:
             history: list[StateType] = []
             results: list[StateType] = []
             for run in range(num_runs):
-                for step in tqdm(range(0, self._n_steps), desc=f"run: {run} | step"):
+                for step in tqdm(range(self._n_steps), desc=f"run: {run} | step"):
                     if self._system.uses_solana:
                         updates = await self._system.initialStep() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
                     else:
