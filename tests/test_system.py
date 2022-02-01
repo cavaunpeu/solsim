@@ -1,6 +1,5 @@
 import os
 from signal import SIGTERM
-from unittest.mock import MagicMock
 from pytest import fixture
 from typing import Any, Dict, List
 
@@ -66,7 +65,7 @@ def test_solana_localnet_process(mocker, workspace_dir, solana_client, solana_lo
 
 
 def test_workspace_created_and_closed(mocker, workspace_dir, solana_client, solana_localnet_process):
-    workspace = MagicMock()
+    workspace = mocker.MagicMock()
     mocker.patch("psutil.Process", return_value=solana_localnet_process)
     mocker.patch("solsim.system.create_workspace", return_value=workspace)
     mocker.patch("solsim.system.close_workspace")
