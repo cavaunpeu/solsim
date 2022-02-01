@@ -15,7 +15,7 @@ class LotkaVolterraSystem(BaseSystem):
         self.reproduction_rate = reproduction_rate
         self.consumption_rate = consumption_rate
 
-    def initialStep(self) -> Dict:
+    def initial_step(self) -> Dict:
         return {
             "population_size": self.population_size,
             "food_supply": self.food_supply,

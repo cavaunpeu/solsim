@@ -15,7 +15,7 @@ class SomeSolanaSystem(BaseSolanaSystem):
     def __init__(self, workspace_dir, client, localnet_process):
         super().__init__(workspace_dir, client=client, localnet_process=localnet_process)
 
-    async def initialStep(self) -> Dict:
+    async def initial_step(self) -> Dict:
         return {"a": 1}
 
     async def step(self, state: Dict[str, Any], history: List[Dict[str, Any]]) -> Dict:
