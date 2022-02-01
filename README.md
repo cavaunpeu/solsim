@@ -83,6 +83,13 @@ simulation = Simulation(system=SomeSystem(), watchlist=("population"), n_steps=5
 results = simulation.run()
 ```
 
+## CLI
+
+Simulations can also be run via CLI. Instead of calling `simulation.run()`, simply:
+
+1. Call `simulation.cli()`
+2. Run your simulation as e.g. `python path/to/file.py run --num-runs 3`
+
 ## Results Explorer
 
 solsim gives you a streamlit app to explore results, e.g.
@@ -90,6 +97,11 @@ solsim gives you a streamlit app to explore results, e.g.
 <div>
     <img src="https://raw.githubusercontent.com/cavaunpeu/solsim/main/img/results_explorer_app.png">
 </div>
+
+To automatically start this app following simulation, invoke one of the following:
+
+- `simulation.run(visualize_results=True)`
+- `--viz-results` flag in the CLI runner, e.g. `python path/to/file.py run --viz-results`
 
 ## Installation
 
