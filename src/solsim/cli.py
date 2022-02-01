@@ -1,7 +1,7 @@
 import typer
 
 
-def CLI(simulation):
+def build_cli(simulation):
     app = typer.Typer()
 
     @app.command()

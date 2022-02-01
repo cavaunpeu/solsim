@@ -9,7 +9,7 @@ import feather
 import pandas as pd
 from tqdm.auto import tqdm
 
-from solsim.cli import CLI
+from solsim.cli import build_cli
 from solsim.system import BaseSystem, BaseSolanaSystem
 from solsim.type import StateType
 
@@ -25,7 +25,7 @@ class Simulation:
 
     @property
     def cli(self):
-        return CLI(self)
+        return build_cli(self)
 
     def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
