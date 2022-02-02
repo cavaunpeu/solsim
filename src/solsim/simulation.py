@@ -27,8 +27,8 @@ class Simulation:
         app = typer.Typer()
 
         @app.command()  # type: ignore
-        def run(num_runs: int = 1, viz_results: bool = False) -> pd.DataFrame:
-            return self.run(num_runs, viz_results)
+        def run(runs: int = 1, steps_per_run: int = 1, viz_results: bool = False) -> pd.DataFrame:
+            return self.run(runs, steps_per_run, viz_results)
 
         @app.callback()  # type: ignore
         def callback() -> None:
