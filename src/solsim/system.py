@@ -77,7 +77,7 @@ class BaseSolanaSystem(ABC, BaseMixin):
             if not self._localnet_process:
                 self._logfile = tempfile.NamedTemporaryFile()
                 self._localnet = self._start_localnet()
-                print("Waiting for Solana localnet cluster to start (~5s) ...")
+                print("👆 Starting Solana localnet cluster (~5s) ...")
                 while not self._localnet_ready:
                     time.sleep(1)
             else:
@@ -86,7 +86,7 @@ class BaseSolanaSystem(ABC, BaseMixin):
 
     def teardown(self) -> None:
         if self._localnet_initialized:
-            print("Tearing down Solana localnet cluster ...")
+            print("👇 Terminating Solana localnet cluster ...")
             self._terminate_localnet()
         self._localnet_initialized = False
 
