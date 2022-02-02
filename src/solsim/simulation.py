@@ -3,7 +3,8 @@ from collections.abc import Iterable
 import os
 import subprocess
 import tempfile
-from typing import Any, Union
+from typing import Any, Dict, Union
+from anchorpy import close_workspace
 
 import feather
 import pandas as pd
@@ -64,22 +65,26 @@ class Simulation:
         return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__), env=env)
 
     async def _run(self, num_runs: int, num_steps_per_run: int) -> pd.DataFrame:
+        results: list[StateType] = []
         try:
-            state: StateType = {}
-            history: list[StateType] = []
-            results: list[StateType] = []
             for run in range(num_runs):
-                for step in tqdm(range(num_steps_per_run), desc=f"run: {run} | step"):
-                    if self._system.uses_solana:
-                        updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
-                    else:
-                        updates = self._system.initial_step() if step == 0 else self._system.step(state, history)
-                    state = {**state, **updates, "run": run, "step": step}
-                    history.append(state)
-                    results.append(self._filter_state(state))
+                try:
+                    state: StateType = {}
+                    history: list[StateType] = []
+                    self._system.setup()
+                    for step in tqdm(range(num_steps_per_run), desc=f"run: {run} | step"):
+                        if self._system.uses_solana:
+                            updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
+                        else:
+                            updates = self._system.initial_step() if step == 0 else self._system.step(state, history)
+                        state = {**state, **updates, "run": run, "step": step}
+                        history.append(state)
+                        results.append(self._filter_state(state))
+                finally:
+                    self._system.teardown()
         finally:
             if self._system.uses_solana:
-                await self._system.tearDown()  # type: ignore
+                await self._system.cleanup()
         results = pd.DataFrame(results)
         return self._reorder_results_columns(results)
 
