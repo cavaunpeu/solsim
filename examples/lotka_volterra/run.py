@@ -10,7 +10,7 @@ def main():
             reproduction_rate=0.01,
             consumption_rate=0.1,
         ),
-        watchlist=("population_size", "food_supply")
+        watchlist=("population_size", "food_supply"),
     )
     return simulation.run(steps_per_run=4)
 
