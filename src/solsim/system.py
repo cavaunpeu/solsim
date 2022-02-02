@@ -21,10 +21,13 @@ class BaseMixin:
     def uses_solana(self) -> bool:
         return isinstance(self, BaseSolanaSystem)
 
-    def setup(self) -> None:
+    def setup(self) -> Any:
         pass
 
-    def teardown(self) -> None:
+    def teardown(self) -> Any:
+        pass
+
+    def cleanup(self) -> Any:
         pass
 
 
@@ -64,13 +67,13 @@ class BaseSolanaSystem(ABC, BaseMixin):
     ) -> None:
         self._workspace_dir = workspace_dir
         self._localnet_process = localnet_process
-        self._localnet = None
+        self._localnet_initialized = False
         self.setup()
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
         self.workspace = create_workspace(self._workspace_dir)
 
-    def setup(self):
-        if self._localnet is None:
+    def setup(self) -> None:
+        if not self._localnet_initialized:
             if not self._localnet_process:
                 self._logfile = tempfile.NamedTemporaryFile()
                 self._localnet = self._start_localnet()
@@ -79,14 +82,15 @@ class BaseSolanaSystem(ABC, BaseMixin):
                     time.sleep(1)
             else:
                 self._localnet = self._localnet_process
+            self._localnet_initialized = True
 
     def teardown(self) -> None:
-        if self._localnet is not None:
+        if self._localnet_initialized:
             print("Tearing down Solana localnet cluster ...")
             self._terminate_localnet()
-        self._localnet = None
+        self._localnet_initialized = False
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         await close_workspace(self.workspace)
 
     @abstractmethod

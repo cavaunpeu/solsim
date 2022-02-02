@@ -3,8 +3,7 @@ from collections.abc import Iterable
 import os
 import subprocess
 import tempfile
-from typing import Any, Dict, Union
-from anchorpy import close_workspace
+from typing import Any, Union
 
 import feather
 import pandas as pd
@@ -83,8 +82,8 @@ class Simulation:
                 finally:
                     self._system.teardown()
         finally:
-            if self._system.uses_solana:
-                await self._system.cleanup()
+            await self._system.cleanup() if self._system.uses_solana else self._system.cleanup()
+
         results = pd.DataFrame(results)
         return self._reorder_results_columns(results)
 
