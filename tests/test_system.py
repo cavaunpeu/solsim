@@ -58,8 +58,8 @@ def test_get_token_account_balance(workspace_dir, solana_client, solana_localnet
 def test_solana_localnet_process(mocker, workspace_dir, solana_client, solana_localnet_process):
     mocker.patch("psutil.Process", return_value=solana_localnet_process)
     system = SomeSolanaSystem(workspace_dir, solana_client, solana_localnet_process)
-    simulation = Simulation(system, watchlist=("a"), n_steps=5)
-    simulation.run()
+    simulation = Simulation(system, watchlist=("a"))
+    simulation.run(num_steps_per_run=5)
 
     solana_localnet_process.send_signal.assert_called_once_with(SIGTERM)
 
@@ -73,7 +73,7 @@ def test_workspace_created_and_closed(mocker, workspace_dir, solana_client, sola
 
     solsim.system.create_workspace.assert_called_once_with(workspace_dir)
 
-    simulation = Simulation(system, watchlist=("a"), n_steps=5)
-    simulation.run()
+    simulation = Simulation(system, watchlist=("a"))
+    simulation.run(num_steps_per_run=5)
 
     solsim.system.close_workspace.assert_called_once_with(workspace)

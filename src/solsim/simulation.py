@@ -18,10 +18,9 @@ class Simulation:
 
     INDEX_COLS = ["step", "run"]
 
-    def __init__(self, system: Union[BaseSystem, BaseSolanaSystem], watchlist: Iterable[str], n_steps: int) -> None:
+    def __init__(self, system: Union[BaseSystem, BaseSolanaSystem], watchlist: Iterable[str]) -> None:
         self._system = system
         self._watchlist = set(watchlist)
-        self._n_steps = n_steps
 
     @property
     def cli(self) -> typer.Typer:
@@ -37,7 +36,7 @@ class Simulation:
 
         return app
 
-    def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
+    def run(self, num_runs: int = 1, num_steps_per_run: int = 3, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
 
         Args:
@@ -47,7 +46,7 @@ class Simulation:
         Returns:
             results: A pandas DataFrame containing your simulation results.
         """
-        results = asyncio.run(self._run(num_runs))
+        results = asyncio.run(self._run(num_runs, num_steps_per_run))
         if visualize_results:
             try:
                 with tempfile.TemporaryDirectory() as tmpdir:
@@ -64,13 +63,13 @@ class Simulation:
         env = {**os.environ, "SOLSIM_RESULTS_PATH": results_path}
         return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__), env=env)
 
-    async def _run(self, num_runs: int) -> pd.DataFrame:
+    async def _run(self, num_runs: int, num_steps_per_run: int) -> pd.DataFrame:
         try:
             state: StateType = {}
             history: list[StateType] = []
             results: list[StateType] = []
             for run in range(num_runs):
-                for step in tqdm(range(self._n_steps), desc=f"run: {run} | step"):
+                for step in tqdm(range(num_steps_per_run), desc=f"run: {run} | step"):
                     if self._system.uses_solana:
                         updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
                     else:
