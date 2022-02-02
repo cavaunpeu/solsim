@@ -11,9 +11,8 @@ def main():
             consumption_rate=0.1,
         ),
         watchlist=("population_size", "food_supply"),
-        n_steps=4,
     )
-    return simulation.run()
+    return simulation.run(steps_per_run=4)
 
 
 if __name__ == "__main__":

@@ -64,8 +64,8 @@ class SomeSolanaSystem(BaseSolanaSystem):
         return {"balance": await self.client.get_balance(self.account)}
 
 
-simulation = Simulation(system=SomeSolanaSystem(), watchlist=("balance"), n_steps=5)
-results = simulation.run()  # Returns pandas DataFrame of results.
+simulation = Simulation(system=SomeSolanaSystem(), watchlist=("balance"))
+results = simulation.run(steps_per_run=5)  # Returns pandas DataFrame of results.
 ```
 
 ### Without Solana
@@ -82,8 +82,8 @@ class SomeSystem(BaseSystem):
         return {"population": state["population"] * 1.1}
 
 
-simulation = Simulation(system=SomeSystem(), watchlist=("population"), n_steps=5)
-results = simulation.run()
+simulation = Simulation(system=SomeSystem(), watchlist=("population"))
+results = simulation.run(steps_per_run=5)
 ```
 
 ## CLI
@@ -150,7 +150,7 @@ This client lets you interact with Solana's RPC endpoints. Documentation [here](
 Finally,
 
 1. Define a `watchlist`: variables (returned in `initial_step` and `step`) you'd like to "watch."
-2. Instantiate and run your simulation, e.g. `Simulation(MySystem(), watchlist, n_steps=10).run()`.
+2. Instantiate and run your simulation, e.g. `Simulation(MySystem(), watchlist).run(steps_per_run=10)`.
 
 ### Without Solana
 

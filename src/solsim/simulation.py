@@ -18,18 +18,17 @@ class Simulation:
 
     INDEX_COLS = ["step", "run"]
 
-    def __init__(self, system: Union[BaseSystem, BaseSolanaSystem], watchlist: Iterable[str], n_steps: int) -> None:
+    def __init__(self, system: Union[BaseSystem, BaseSolanaSystem], watchlist: Iterable[str]) -> None:
         self._system = system
         self._watchlist = set(watchlist)
-        self._n_steps = n_steps
 
     @property
     def cli(self) -> typer.Typer:
         app = typer.Typer()
 
         @app.command()  # type: ignore
-        def run(num_runs: int = 1, viz_results: bool = False) -> pd.DataFrame:
-            return self.run(num_runs, viz_results)
+        def run(runs: int = 1, steps_per_run: int = 1, viz_results: bool = False) -> pd.DataFrame:
+            return self.run(runs, steps_per_run, viz_results)
 
         @app.callback()  # type: ignore
         def callback() -> None:
@@ -37,17 +36,17 @@ class Simulation:
 
         return app
 
-    def run(self, num_runs: int = 1, visualize_results: bool = False) -> pd.DataFrame:
+    def run(self, runs: int = 1, steps_per_run: int = 3, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
 
         Args:
-            num_runs: The number of times to run your simulation.
+            runs: The number of times to run your simulation.
             visualize_results: Optionally build and start a Streamlit app to explore simulation results.
 
         Returns:
             results: A pandas DataFrame containing your simulation results.
         """
-        results = asyncio.run(self._run(num_runs))
+        results = asyncio.run(self._run(runs, steps_per_run))
         if visualize_results:
             try:
                 with tempfile.TemporaryDirectory() as tmpdir:
@@ -64,23 +63,27 @@ class Simulation:
         env = {**os.environ, "SOLSIM_RESULTS_PATH": results_path}
         return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__), env=env)
 
-    async def _run(self, num_runs: int) -> pd.DataFrame:
+    async def _run(self, runs: int, steps_per_run: int) -> pd.DataFrame:
+        results: list[StateType] = []
         try:
-            state: StateType = {}
-            history: list[StateType] = []
-            results: list[StateType] = []
-            for run in range(num_runs):
-                for step in tqdm(range(self._n_steps), desc=f"run: {run} | step"):
-                    if self._system.uses_solana:
-                        updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
-                    else:
-                        updates = self._system.initial_step() if step == 0 else self._system.step(state, history)
-                    state = {**state, **updates, "run": run, "step": step}
-                    history.append(state)
-                    results.append(self._filter_state(state))
+            for run in range(runs):
+                try:
+                    state: StateType = {}
+                    history: list[StateType] = []
+                    self._system.setup()
+                    for step in tqdm(range(steps_per_run), desc=f"🟢 run: {run} | step"):
+                        if self._system.uses_solana:
+                            updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
+                        else:
+                            updates = self._system.initial_step() if step == 0 else self._system.step(state, history)
+                        state = {**state, **updates, "run": run, "step": step}
+                        history.append(state)
+                        results.append(self._filter_state(state))
+                finally:
+                    self._system.teardown()
         finally:
-            if self._system.uses_solana:
-                await self._system.tearDown()  # type: ignore
+            await self._system.cleanup() if self._system.uses_solana else self._system.cleanup()
+
         results = pd.DataFrame(results)
         return self._reorder_results_columns(results)
 

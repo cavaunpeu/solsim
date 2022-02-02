@@ -11,4 +11,4 @@ def test_lotka_volterra():
 def test_drunken_escrow():
     from examples.drunken_escrow.run import main
 
-    main(n_escrows=1, n_steps=1)
+    main(num_escrows=1, steps_per_run=1)

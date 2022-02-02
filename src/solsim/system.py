@@ -7,7 +7,7 @@ from subprocess import DEVNULL
 import tempfile
 from typing import Awaitable, Optional, List, Any
 
-from anchorpy import create_workspace, close_workspace
+from anchorpy import close_workspace, create_workspace
 from psutil import Process
 from solana.publickey import PublicKey
 from solana.rpc.api import Client
@@ -20,6 +20,15 @@ class BaseMixin:
     @property
     def uses_solana(self) -> bool:
         return isinstance(self, BaseSolanaSystem)
+
+    def setup(self) -> Any:
+        pass
+
+    def teardown(self) -> Any:
+        pass
+
+    def cleanup(self) -> Any:
+        pass
 
 
 class BaseSystem(ABC, BaseMixin):
@@ -56,17 +65,33 @@ class BaseSolanaSystem(ABC, BaseMixin):
     def __init__(
         self, workspace_dir: str, client: Optional[Client] = None, localnet_process: Optional[Process] = None
     ) -> None:
-        if not localnet_process:
-            self._logfile = tempfile.NamedTemporaryFile()
-            self._localnet = self._start_localnet(workspace_dir)
-            print("Waiting for Solana localnet cluster to start (~10s) ...")
-            while not self._localnet_ready:
-                time.sleep(1)
-        else:
-            self._localnet = localnet_process
-
-        self.workspace = create_workspace(workspace_dir)
+        self._workspace_dir = workspace_dir
+        self._localnet_process = localnet_process
+        self._localnet_initialized = False
+        self.setup()
         self.client = client or Client(self.SOLANA_CLUSTER_URI)
+        self.workspace = create_workspace(self._workspace_dir)
+
+    def setup(self) -> None:
+        if not self._localnet_initialized:
+            if not self._localnet_process:
+                self._logfile = tempfile.NamedTemporaryFile()
+                self._localnet = self._start_localnet()
+                print("👆 Starting Solana localnet cluster (~5s) ...")
+                while not self._localnet_ready:
+                    time.sleep(1)
+            else:
+                self._localnet = self._localnet_process
+            self._localnet_initialized = True
+
+    def teardown(self) -> None:
+        if self._localnet_initialized:
+            print("👇 Terminating Solana localnet cluster ...")
+            self._terminate_localnet()
+        self._localnet_initialized = False
+
+    async def cleanup(self) -> None:
+        await close_workspace(self.workspace)
 
     @abstractmethod
     async def initial_step(self) -> Awaitable[StateType]:
@@ -96,21 +121,16 @@ class BaseSolanaSystem(ABC, BaseMixin):
         """
         raise NotImplementedError
 
-    def _start_localnet(self, workspace_dir: str) -> subprocess.Popen[Any]:
+    def _start_localnet(self) -> subprocess.Popen[Any]:
         for proc in psutil.process_iter():
             if proc.name() == "solana-test-validator":
                 self._terminate_processes([proc])
-        return subprocess.Popen(["anchor", "localnet"], cwd=workspace_dir, stdout=self._logfile, stderr=DEVNULL)
+        return subprocess.Popen(["anchor", "localnet"], cwd=self._workspace_dir, stdout=self._logfile, stderr=DEVNULL)
 
     @property
     def _localnet_ready(self) -> bool:
         lastline = subprocess.check_output(["tail", "-n", "1", self._logfile.name]).decode("utf-8").strip()
         return "| Processed Slot: " in lastline
-
-    async def tearDown(self) -> None:
-        await close_workspace(self.workspace)
-        if self._localnet is not None:
-            self._terminate_localnet()
 
     def get_token_account_balance(
         self, pubkey: PublicKey, commitment: Optional[commitment.Commitment] = commitment.Confirmed
@@ -137,7 +157,7 @@ class BaseSolanaSystem(ABC, BaseMixin):
         _, alive = psutil.wait_procs(kill_list, timeout=timeout)
 
         if alive:
-            raise Exception(f"could not terminated process {alive}")
+            raise Exception(f"could not terminate process {alive}")
 
     def _terminate_localnet(self) -> None:
         """
