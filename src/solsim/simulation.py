@@ -37,17 +37,17 @@ class Simulation:
 
         return app
 
-    def run(self, num_runs: int = 1, num_steps_per_run: int = 3, visualize_results: bool = False) -> pd.DataFrame:
+    def run(self, runs: int = 1, steps_per_run: int = 3, visualize_results: bool = False) -> pd.DataFrame:
         """Run your simulation.
 
         Args:
-            num_runs: The number of times to run your simulation.
+            runs: The number of times to run your simulation.
             visualize_results: Optionally build and start a Streamlit app to explore simulation results.
 
         Returns:
             results: A pandas DataFrame containing your simulation results.
         """
-        results = asyncio.run(self._run(num_runs, num_steps_per_run))
+        results = asyncio.run(self._run(runs, steps_per_run))
         if visualize_results:
             try:
                 with tempfile.TemporaryDirectory() as tmpdir:
@@ -64,15 +64,15 @@ class Simulation:
         env = {**os.environ, "SOLSIM_RESULTS_PATH": results_path}
         return subprocess.Popen(["streamlit", "run", "visualize.py"], cwd=os.path.dirname(__file__), env=env)
 
-    async def _run(self, num_runs: int, num_steps_per_run: int) -> pd.DataFrame:
+    async def _run(self, runs: int, steps_per_run: int) -> pd.DataFrame:
         results: list[StateType] = []
         try:
-            for run in range(num_runs):
+            for run in range(runs):
                 try:
                     state: StateType = {}
                     history: list[StateType] = []
                     self._system.setup()
-                    for step in tqdm(range(num_steps_per_run), desc=f"run: {run} | step"):
+                    for step in tqdm(range(steps_per_run), desc=f"run: {run} | step"):
                         if self._system.uses_solana:
                             updates = await self._system.initial_step() if step == 0 else await self._system.step(state, history)  # type: ignore  # noqa: E501
                         else:

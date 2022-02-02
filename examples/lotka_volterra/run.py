@@ -12,7 +12,7 @@ def main():
         ),
         watchlist=("population_size", "food_supply")
     )
-    return simulation.run(num_steps_per_run=4)
+    return simulation.run(steps_per_run=4)
 
 
 if __name__ == "__main__":

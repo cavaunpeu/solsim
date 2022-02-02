@@ -4,7 +4,7 @@ from .system import DrunkenEscrowSystem
 from solsim.simulation import Simulation
 
 
-def main(num_escrows=3, num_steps=4):
+def main(num_escrows=3, steps_per_run=4):
     simulation = Simulation(
         system=DrunkenEscrowSystem(
             workspace_dir=os.path.join(os.path.dirname(__file__), "anchor-escrow-program"),
@@ -13,7 +13,7 @@ def main(num_escrows=3, num_steps=4):
         ),
         watchlist=("num_swaps", "mean_swap_amount", "mean_balance_spread")
     )
-    return simulation.run(num_steps_per_run=num_steps)
+    return simulation.run(steps_per_run=steps_per_run)
 
 
 if __name__ == "__main__":

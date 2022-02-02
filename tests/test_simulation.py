@@ -1,8 +1,8 @@
 from solsim.simulation import Simulation
 
 
-def mock_run_method(num_runs, num_steps_per_run, visualize_results):
-    return num_runs, num_steps_per_run, visualize_results
+def mock_run_method(runs, steps_per_run, visualize_results):
+    return runs, steps_per_run, visualize_results
 
 
 def test_cli_command_list():
