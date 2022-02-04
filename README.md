@@ -88,10 +88,10 @@ results = simulation.run(steps_per_run=5)
 
 ## CLI
 
-Simulations can also be run via CLI. Instead of calling `simulation.run()`, simply:
+Optionally run your simulations via CLI. Instead of calling `simulation.run()` in your code:
 
-1. Call `simulation.cli()`
-2. Run your simulation as e.g. `python path/to/file.py run --num-runs 3`
+1. Call `simulation.cli()`.
+2. Run your simulation as e.g. `python path/to/file.py run --num-runs 3`.
 
 ## Results Explorer
 
@@ -170,14 +170,15 @@ Agents are randomly paired to exchange random amounts of `foo_coin` and `bar_coi
 - Expected output (numbers may vary):
 
 ```
-(.venv) ➜  solsim git:(main) $ python -m examples.drunken_escrow
-Waiting for Solana localnet cluster to start (~10s) ...
-Steps completed: 100%|████████████████████████████████████████████████████████████████████████████████████| 4/4 [00:27<00:00,  6.82s/it]
-   step  mean_balance_spread  mean_swap_amount  num_swaps
-0    -1            40.000000         30.666667          3
-1     0            58.000000         12.000000          3
-2     1            60.666667          4.000000          3
-3     2            83.333333         21.500000          2
+(.venv) ➜  solsim git:(main) python -m examples.drunken_escrow
+👆 Starting Solana localnet cluster (~5s) ...
+🟢 run: 0 | step: 100%|███████████████████████████████████████████████████████████████████████████████████| 4/4 [00:34<00:00,  8.60s/it]
+👇 Terminating Solana localnet cluster ...
+   step  run  mean_balance_spread  mean_swap_amount  num_swaps
+0     0    0            17.333333         41.333333          3
+1     1    0            22.000000          4.666667          3
+2     2    0            40.000000         25.666667          3
+3     3    0            44.000000         14.666667          3
 ```
 
 ### Lotka-Volterra
@@ -189,16 +190,16 @@ The Lotka-Volterra model is a classic dynamical system in the field of ecology t
 - Expected output:
 
 ```
-(.venv) ➜  solsim git:(main) ✗ python -m examples.lotka_volterra
-Steps completed: 100%|█████████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00, 28581.29it/s]
-   step  food_supply  population_size
-0    -1     1000.000            50.00
-1     0      995.000            60.00
-2     1      989.000            69.95
-3     2      982.005            79.84
+(.venv) ➜  solsim git:(main) python -m examples.lotka_volterra
+🟢 run: 0 | step: 100%|████████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00, 70492.50it/s]
+   step  run  food_supply  population_size
+0     0    0     1000.000            50.00
+1     1    0      995.000            60.00
+2     2    0      989.000            69.95
+3     3    0      982.005            79.84
 ```
 
-This implementation inspired by [cadCAD Edu](https://www.cadcad.education/).
+This example is inspired by [cadCAD Edu](https://www.cadcad.education/).
 
 ## Inspiration
 
